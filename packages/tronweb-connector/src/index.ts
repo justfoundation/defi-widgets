@@ -1,13 +1,49 @@
 'use strict';
 
+interface Error {
+  name: string;
+  message: string;
+  stack?: string;
+}
+
 export class Connector {
   [x: string]: any;
+  public defaultAccount: any;
 
-  handleTronWallet = async (tron: any) => {
+  private accountsChangedListener = () => {
+    window.location.reload();
+  };
+
+  private setAccountListener = () => {
+    window.location.reload();
+  };
+
+  private chainChangedListener = () => {
+    window.location.reload();
+  };
+
+  private disconnectListener = () => {
+    window.location.reload();
+  };
+
+  private connectListener = () => {
+    window.location.reload();
+  };
+
+  errorMessage = (error: Error) => {
+    return error;
+  };
+
+  handleTronWallet = async (tron: any, login?: boolean) => {
     if (!tron) {
-      return `error: Didn't get tronweb`;
+      const error = this.errorMessage({
+        message: `error: Didn't get tronweb`,
+        name: 'error',
+      });
+      return error;
     }
-    if (tron && tron.defaultAddress && tron.defaultAddress.base58) {
+    if (tron?.defaultAddress?.base58) {
+      this.defaultAccount = tron.defaultAddress.base58;
       return tron;
     }
 
@@ -16,19 +52,23 @@ export class Connector {
       // Access the decentralized web!
       const tronWeb = tronLink.tronWeb;
       return tronWeb;
-    } else {
+    } else if (login){
       const res = await tronLink.request({ method: 'tron_requestAccounts' });
       if (res.code === 200) {
         const tronWeb = tronLink.tronWeb;
         return tronWeb;
       }
       if (res.code === 4001) {
-        return `error: Current connection refused`;
+        const error = this.errorMessage({
+          message: `error: Current connection refused`,
+          name: 'error',
+        });
+        return error;
       }
     }
   };
 
-  initTronLinkWallet = () => {
+  initTronLinkWallet = async (login?: boolean) => {
     try {
       const self = this;
       const tronlinkPromise = new Promise(reslove => {
@@ -74,13 +114,41 @@ export class Connector {
       });
 
       const tron = Promise.race([tronlinkPromise, appPromise]).then(res => {
-        return self.handleTronWallet(res);
+        return self.handleTronWallet(res, login);
       });
+
+      this.on('accountsChanged', this.accountsChangedListener);
+      this.on('setAccount', this.setAccountListener);
+      this.on('setNode', this.chainChangedListener);
+      this.on('disconnectWeb', this.disconnectListener);
+      this.on('connectWeb', this.connectListener);
       return tron;
     } catch (e) {
       return `error: ${e}`;
     }
   };
+
+  on = (_action: string, cb: any) => {
+    window.addEventListener('message', res => {
+      if (res.data.message && res.data.message.action == _action) {
+        if (_action == 'setAccount') {
+          if (
+            (window as any).tronWeb &&
+            !(window as any).tronLink &&
+            res.data.message.data.address !== this.defaultAccount
+          ) {
+            cb & cb();
+          }
+        } else {
+          cb & cb();
+        }
+      }
+    });
+  };
+
+  activate = async () => {
+    return await this.initTronLinkWallet(true);
+  }
 }
 
-export const tronWebConnector = new Connector();
+export const TronWebConnector = new Connector();
