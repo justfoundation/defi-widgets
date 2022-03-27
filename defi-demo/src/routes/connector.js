@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import './App.css';
+import '../App.scss';
 import BigNumber from 'bignumber.js';
 import { TronWebConnector } from '@widgets/tronweb-connector';
 

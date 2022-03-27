@@ -17,20 +17,19 @@ export class Contract {
         throw new Error('Unknown trigger error: ' + JSON.stringify(transaction.transaction));
       }
       return transaction;
-    } catch (error: any) {
-      throw new Error(error);
+    } catch (error) {
+      console.log(error);
     }
   };
 
-  sign = async (transaction: { transaction: any; }, tronweb: any) => {
+  sign = async (transaction: any, tronweb: any) => {
     try {
       const tronWeb = tronweb || (window as any).tronWeb;
       if (!tronWeb.defaultAddress) return;
-      const signedTransaction = await tronWeb.trx.sign(transaction.transaction);
+      const signedTransaction = await tronWeb.trx.sign(transaction);
       return signedTransaction;
-    } catch (error: any) {
+    } catch (error) {
       console.log(error, 'signerr');
-      throw new Error(error);
     }
   }
 
@@ -40,28 +39,29 @@ export class Contract {
       if (!tronWeb.defaultAddress) return;
       const result = await tronWeb.trx.sendRawTransaction(signedTransaction);
       return result;
-    } catch (error: any) {
-      throw new Error(error);
+    } catch (error) {
+      console.log(error);
     }
   };
 
-  send = async (address: any, functionSelector: any, parameters = [], options = {}, callbacks: () => any, tronWeb: any) => {
+  send = async (address: any, functionSelector: any, parameters = [], options = {}, callbacks: () => any = () => {}, tronWeb: any) => {
     try {
       const transaction = await this.trigger(
         address,
         functionSelector,
-        Object.assign({ feeLimit: this.feeLimitCommon }, options),
+        options,
         parameters,
         tronWeb
       );
 
-      const signedTransaction = await this.sign(transaction, tronWeb);
+      const signedTransaction = await this.sign(transaction?.transaction, tronWeb);
       const result = await this.broadCast(signedTransaction, tronWeb);
 
-      callbacks && callbacks();
+      if (result?.result) callbacks && callbacks();
+      
       return result;
-    } catch (error: any) {
-      console.log(`trigger error ${address} - ${functionSelector}`, error.message ? error.message : error);
+    } catch (error) {
+      console.log(error);
       return {};
     }
   };
@@ -77,8 +77,8 @@ export class Contract {
         parameters
       );
       return result && result.result ? result.constant_result : [];
-    } catch (error: any) {
-      console.log(`view error ${address} - ${functionSelector}`, error.message ? error.message : error);
+    } catch (error) {
+      console.log(error);
       return [];
     }
   };
@@ -88,14 +88,13 @@ export class Contract {
       const tronWeb = tronweb || (window as any).tronWeb;
       if (!tronWeb.defaultAddress) return;
       const transaction = await tronWeb.transactionBuilder.createSmartContract(options, address);
-
       const signedTransaction = await this.sign(transaction, tronWeb);
       const result = await this.broadCast(signedTransaction, tronWeb);
 
       callbacks && callbacks();
       return result;
-    } catch (error: any) {
-      throw new Error(error);
+    } catch (error) {
+      console.log(error);
     }
   }
 
@@ -115,8 +114,8 @@ export class Contract {
 
       callbacks && callbacks();
       return result;
-    } catch (error: any) {
-      throw new Error(error);
+    } catch (error) {
+      console.log(error);
     }
   }
 
@@ -131,9 +130,8 @@ export class Contract {
 
       callbacks && callbacks();
       return result;
-    } catch (error: any) {
+    } catch (error) {
       console.log(error);
-      throw new Error(error);
     }
   }
 }
