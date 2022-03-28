@@ -3,7 +3,7 @@ import '../App.scss';
 import BigNumber from 'bignumber.js';
 import { TronWebConnector } from '@widgets/tronweb-connector';
 import { ContractInteract } from '@widgets/contract-interact';
-const { deploy, send } = ContractInteract;
+const { deploy, send, sendTrx, sendToken, call } = ContractInteract;
 
 function App() {
   const [defaultAccount, setDefaultAccount] = useState(null);
@@ -93,6 +93,39 @@ function App() {
     }
   }
 
+  const callContract = async () => {
+    const res = await call(
+      'TLmDopsmzmGDpQFyzRp1EDQJ588W7URXdH',
+      "getMessage()"
+    );
+
+    if (res?.length) {
+      alert('Call success');
+    }
+  }
+
+  const sendTrxFunc = async () => {
+    const res = await sendTrx(
+      'TBHHa5Z6WQ1cRcgUhdvqdW4f728f2fiJmF',
+      1000000
+    );
+
+    if (res?.result) {
+      alert('Send TRX success');
+    }
+  }
+
+  const sendTokenFunc = async () => {
+    const res = await sendToken(
+      'TBHHa5Z6WQ1cRcgUhdvqdW4f728f2fiJmF',
+      1000000
+    );
+
+    if (res?.result) {
+      alert('Send 10 Token success');
+    }
+  }
+
   return (
     <div className="App">
         {defaultAccount ?
@@ -101,6 +134,9 @@ function App() {
             <div style={{ marginTop: '10px' }}><span style={{ fontSize: '18px' }}>Current account balance: </span>{defaultAccountBalance.toString()} TRX</div>
             <button onClick={() => deployContract()}>Deploy Contract</button>
             <button onClick={() => triggerContract()}>Trigger Contract</button>
+            <button onClick={() => callContract()}>Call Contract</button>
+            <button onClick={() => sendTrxFunc()}>Send TRX</button>
+            <button onClick={() => sendTokenFunc()}>Send 10 Token</button>
           </div>
           :
           <button onClick={() => login()}>Connect Wallet</button>
