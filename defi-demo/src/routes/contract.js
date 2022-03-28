@@ -118,7 +118,8 @@ function App() {
   const sendTokenFunc = async () => {
     const res = await sendToken(
       'TBHHa5Z6WQ1cRcgUhdvqdW4f728f2fiJmF',
-      1000000
+      10000,
+      '1000002'
     );
 
     if (res?.result) {

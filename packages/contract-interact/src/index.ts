@@ -91,7 +91,7 @@ export class Contract {
       const signedTransaction = await this.sign(transaction, tronWeb);
       const result = await this.broadCast(signedTransaction, tronWeb);
 
-      callbacks && callbacks();
+      if (result?.result) callbacks && callbacks();
       return result;
     } catch (error) {
       console.log(error);
@@ -112,23 +112,23 @@ export class Contract {
       const signedTransaction = await this.sign(tradeObj, tronWeb);
       const result = await this.broadCast(signedTransaction, tronWeb);
 
-      callbacks && callbacks();
+      if (result?.result) callbacks && callbacks();
       return result;
     } catch (error) {
       console.log(error);
     }
   }
 
-  sendToken = async (address: any, amount: any, tokenID: any, options: any, callbacks:any, tronweb: any) => {
+  sendToken = async (address: any, amount: any, tokenID: any, privateKey:string = '', callbacks:any, tronweb: any) => {
     try {
       const tronWeb = tronweb || (window as any).tronWeb;
       if (!tronWeb.defaultAddress) return;
-      const tradeObj = await tronWeb.trx.sendToken(address, amount, tokenID, tronWeb.defaultAddress.hex, options);
+      const tradeObj = await tronWeb.trx.sendToken(address, amount, tokenID, privateKey && privateKey);
 
       const signedTransaction = await this.sign(tradeObj, tronWeb);
       const result = await this.broadCast(signedTransaction, tronWeb);
 
-      callbacks && callbacks();
+      if (result?.result) callbacks && callbacks();
       return result;
     } catch (error) {
       console.log(error);
