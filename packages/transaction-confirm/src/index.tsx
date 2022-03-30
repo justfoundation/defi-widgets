@@ -70,9 +70,8 @@ export const OpenTransModal = async (stepInfo = { step: 0, txId: '' }, customObj
   `
 
   const Loading: any = styled.div`
-    font-size: 80px;
+    margin: 15px 0;
     animation: ${BounceAnimation} 2s linear infinite;
-    transform-origin: center;
   `
 
   const modalContent = <div className="trans-modal-container">
@@ -83,7 +82,7 @@ export const OpenTransModal = async (stepInfo = { step: 0, txId: '' }, customObj
         {step == 1 ? (
           <React.Fragment>
             <Loading className="trans-modal-icon">
-              <Loading3QuartersOutlined />
+              <Loading3QuartersOutlined style={{ fontSize: '80px', display: 'flex' }} />
             </Loading>
             <div className="trans-modal-status trans-modal-wait-confirm">{
               customObj.wait_confirm ? customObj.wait_confirm : customObj?.lang === 'zh' ? '等待您的确认' : 'Waiting for your confirmation'
