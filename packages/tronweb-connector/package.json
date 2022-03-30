@@ -31,7 +31,7 @@
     "singleQuote": true,
     "trailingComma": "es5"
   },
-  "name": "tronweb-connector",
+  "name": "@widgets/tronweb-connector",
   "author": "xulei",
   "module": "dist/tronweb-connector.esm.js",
   "size-limit": [

@@ -31,7 +31,7 @@
     "singleQuote": true,
     "trailingComma": "es5"
   },
-  "name": "contract-interact",
+  "name": "@widgets/contract-interact",
   "author": "xulei",
   "module": "dist/contract-interact.esm.js",
   "size-limit": [
