@@ -1,5 +1,5 @@
 import React from 'react';
-import { Loading3QuartersOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
+import { Loading3QuartersOutlined, CheckCircleOutlined, CloseCircleOutlined, CloseOutlined } from '@ant-design/icons';
 import { renderToString } from 'react-dom/server';
 import styled, { keyframes } from 'styled-components';
 
@@ -51,6 +51,7 @@ export const OpenTransModal = async (stepInfo = { step: 0, txId: '' }, customObj
     flex-direction: column;
     align-items: center;
     transform: translateY(50%);
+    position: relative;
   `
 
   const TransTitle: any = styled.div`
@@ -74,64 +75,102 @@ export const OpenTransModal = async (stepInfo = { step: 0, txId: '' }, customObj
     animation: ${BounceAnimation} 2s linear infinite;
   `
 
+  const Close: any = styled.div`
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    right: 15px;
+    top: 15px;
+    cursor: pointer;
+  `
+
+  const intlZh = {
+    transaction: '交易',
+    waiting: '等待您的确认',
+    confirm: '请在您的钱包中确认',
+    submited: '交易已提交',
+    tronscan: '在 TRONSCAN 上查看',
+    cancelled: '交易已取消',
+  }
+
+  const intlEn = {
+    transaction: 'Transaction',
+    waiting: 'Waiting for your confirmation',
+    confirm: 'Please confirm in your wallet',
+    submited: 'Transaction Submitted',
+    tronscan: 'View on TRONSCAN',
+    cancelled: 'Transaction Cancelled',
+  }
+
+  const intl = customObj?.lang === 'zh' ? intlZh : intlEn;
+
   const modalContent = <div className="trans-modal-container">
     <TransMask className="trans-modal-mask" />
     <TransContent className="trans-modal-content">
       <TransBody className="trans-modal-body">
-        <TransTitle className="trans-modal-title">{customObj?.title ? customObj?.title : customObj?.lang === 'zh' ? '交易' : 'Transaction'}</TransTitle>
+        <TransTitle className="trans-modal-title">{customObj?.title ? customObj?.title : intl.transaction}</TransTitle>
         {step == 1 ? (
           <React.Fragment>
             <Loading className="trans-modal-icon">
               <Loading3QuartersOutlined style={{ fontSize: '80px', display: 'flex' }} />
             </Loading>
             <div className="trans-modal-status trans-modal-wait-confirm">{
-              customObj.wait_confirm ? customObj.wait_confirm : customObj?.lang === 'zh' ? '等待您的确认' : 'Waiting for your confirmation'
+              customObj.wait_confirm ? customObj.wait_confirm : intl.waiting
             }</div>
             <div className="trans-modal-tips trans-modal-wait-confirm-tips">{
-              customObj.confirm_wallet ? customObj.confirm_wallet : customObj?.lang === 'zh' ? '请在您的钱包中确认' : 'Please confirm in your wallet'
+              customObj.confirm_wallet ? customObj.confirm_wallet : intl.confirm
             }</div>
           </React.Fragment>
-        ) : null}
-        {step == 2 ? (
+        ) : step == 2 ? (
           <React.Fragment>
             <div className="trans-modal-icon">
               <CheckCircleOutlined style={{ fontSize: '80px' }}></CheckCircleOutlined>
             </div>
-            <div className="trans-modal-status trans-modal-submit">{customObj.submitted ? customObj.submitted : customObj?.lang === 'zh' ? '交易已提交' : 'Transaction Submitted'}</div>
-            <div className="trans-modal-tips trans-modal-submit-tips">
+            <div className="trans-modal-status trans-modal-submit">{customObj.submitted ? customObj.submitted : intl.submited}</div>
+            {txId && <div className="trans-modal-tips trans-modal-submit-tips">
               <a
                 className="typo-text-link"
                 href={`${trongridNode ?'https://tronscan.io/#' : 'https://nile.tronscan.io/#'}/transaction/${txId}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {customObj.view_on_tronscan ? customObj.view_on_tronscan : customObj?.lang === 'zh' ? '在 TRONSCAN 上查看' : 'View on TRONSCAN'}
+                {customObj.view_on_tronscan ? customObj.view_on_tronscan : intl.tronscan}
               </a>
-            </div>
+            </div>}
           </React.Fragment>
-        ) : null}
-        {step == 3 ? (
+        ) : step == 3 ? (
           <React.Fragment>
             <div className="trans-modal-icon">
               <CloseCircleOutlined style={{ fontSize: '80px' }}></CloseCircleOutlined>
             </div>
-            <div className="trans-modal-status trans-modal-cancel">{customObj.cancelled ? customObj.cancelled : customObj?.lang === 'zh' ? '交易已取消' : 'Transaction Cancelled'}</div>
+            <div className="trans-modal-status trans-modal-cancel">{customObj.cancelled ? customObj.cancelled : intl.cancelled}</div>
           </React.Fragment>
-        ) : null}
+        ) : <></>}
+        <Close className="trans-modal-close"><CloseOutlined /></Close>
       </TransBody>
     </TransContent>
   </div>;
 
-  const container = document.createElement('div');
-  container.innerHTML = renderToString(modalContent);
-  document.body.appendChild(container);
+  let container: any = document.querySelector('.wg-modal-root');
+  if (!container) {
+    container = document.createElement('div');
+    container.classList.add('wg-modal-root');
+    container.innerHTML = renderToString(modalContent);
+    document.body.appendChild(container);
+  } else {
+    container.innerHTML = renderToString(modalContent);
+  }
+  container.style.display = 'block';
+
+  let closeIcon: any = document.querySelector('.trans-modal-close');
+  closeIcon.onclick = () => { container.style.display = 'none'; }
 }
 
-export const setTransactionsData = (tx: string, customObj: any, tronweb: any) => {
+export const setTransactionsData = (tx: string, customObj: any, saveAmount: number = 10, tronweb: any) => {
   try {
     const tronWeb = tronweb || (window as any).tronWeb;
     if (!tronWeb.defaultAddress) return;
-    let data = window.localStorage.getItem(`dw-${tronWeb.defaultAddress.base58}`) || '[]';
+    let data = window.localStorage.getItem(`${tronWeb.defaultAddress.base58}_transaction`) || '[]';
     let dataArr = JSON.parse(data);
     let item = {
       title: '', // compatible
@@ -142,8 +181,223 @@ export const setTransactionsData = (tx: string, customObj: any, tronweb: any) =>
       showPending: true
     };
     dataArr.unshift(item);
-    window.localStorage.setItem(`${tronWeb.defaultAddress.base58}_transaction`, JSON.stringify(dataArr.slice(0, 10)));
+    window.localStorage.setItem(`${tronWeb.defaultAddress.base58}_transaction`, JSON.stringify(dataArr.slice(0, saveAmount)));
   } catch (error) {
     console.log(error);
+  }
+};
+
+export const getTransactionInfo = (tx: string, tronweb = null) => {
+  const tronWeb = tronweb || (window as any).tronWeb;
+  return new Promise((resolve, reject) => {
+    tronWeb.trx.getConfirmedTransaction(tx, (e: any, r: unknown) => {
+      if (!e) {
+        resolve(r);
+      } else {
+        reject(e);
+      }
+    });
+  });
+};
+
+export const getDescription = async (type: number, item: any, text: string, tronweb = null) => {
+  const { tx, lang, view_on_tronscan } = item;
+  let className = '';
+  switch (type) {
+    case 1:
+      className = 'trans-pending';
+      break;
+    case 2:
+      className = 'trans-confirmed';
+      break;
+    case 3:
+      className = 'trans-failed';
+      break;
+  }
+  const intlZh = {
+    tronscan: '在 TRONSCAN 上查看',
+    errTip: '失败原因可能是以下几种，请自查：<br /> ①能量或者带宽不足，需补充 <br /> ②滑点设置过低，需重新设置 <br /> ③当前网络过于拥堵，请稍后再试 <br /> ④系统时间不正确，请校验后再试'
+  };
+  const intlEn = {
+    tronscan: 'View on TRONSCAN',
+    errTip: 'Failure may be caused by the following situations, please check if:<br />①your Energy or bandwidth is insufficient; please top up<br />②your slippage is too low; please reset<br />③your current network is congested; please try again later<br />④your system time is incorrect; please check and try again'
+  };
+  const intl = lang === 'zh' ? intlZh : intlEn;
+  const tronWeb = tronweb || (window as any).tronWeb;
+  const res = await tronWeb.fullNode;
+  const { host } = res;
+  const trongridNode = host === 'https://api.trongrid.io';
+  const Notify: any = styled.div`
+    position: relative;
+  `
+  const ErrTip: any = styled.div`
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: #000;
+    color: #fff;
+  `
+  const notifyDom = (
+    <Notify className={'wg-trans-notify'}>
+      <span>
+        <a
+          className="typo-text-link"
+          href={`${trongridNode ?'https://tronscan.io/#' : 'https://nile.tronscan.io/#'}/transaction/${tx}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {view_on_tronscan ? view_on_tronscan : intl.tronscan}
+        </a>
+      </span>
+      {type === 3 ? (
+        <div className={'flex between ai-center '}>
+          <ErrTip className="wg-notify-errTip" dangerouslySetInnerHTML={{__html: intl.errTip}}></ErrTip>
+          <span className="wg-notify-ques">?</span>
+          <span className={'trans-btn-tip ' + className}>{text}</span>
+        </div>
+      ) : (
+        <span className={'trans-btn-tip ' + className}>{text}</span>
+      )}
+    </Notify>
+  );
+  const ques: any = document.querySelector('.wg-notify-ques');
+  const errTip: any = document.querySelector('.wg-notify-errTip');
+  ques.onmouseover = () => {errTip.style.display = 'block'};
+  ques.onmouseend = () => {errTip.style.display = 'none'};
+
+  return notifyDom;
+};
+
+export const checkPendingTransactions = (tronweb = null) => {
+  const tronWeb = tronweb || (window as any).tronWeb;
+  let data = window.localStorage.getItem(`${tronWeb.defaultAddress.base58}_transaction`) || '[]';
+  const transactions = JSON.parse(data);
+
+  transactions.map((item: { checkCnt?: any; tx?: any; status?: any; showPending?: any; }) => {
+    const { tx, status, showPending } = item;
+    if (Number(status) === 1) {
+      if (showPending) {
+        logTransaction(item, 1);
+      }
+      item.checkCnt++;
+      getTransactionInfo(tx)
+        .then((r: any) => {
+          if (r) {
+            if (r?.ret[0]?.contractRet === 'SUCCESS') {
+              logTransaction(item, 2);
+            } else if (r && r.ret && r.ret[0].contractRet && r.ret[0].contractRet != 'SUCCESS') {
+              logTransaction(item, 3);
+            } else {
+              if (item.checkCnt != undefined && item.checkCnt < 30) {
+                setTimeout(checkPendingTransactions, 3000);
+              } else {
+                logTransaction(item, 3);
+              }
+            }
+          }
+        })
+        .catch(ex => {
+          console.error(ex);
+        });
+    }
+    return false;
+  });
+};
+
+export const logTransaction = (item: { checkCnt?: any; tx?: any; status?: any; showPending?: any; intlObj?: any; }, status: number, lang: string = 'en') => {
+  item.status = status;
+  if (status === 1) item.showPending = false;
+  const { intlObj } = item;
+
+  const Notification: any = styled.div`
+    position: absolute;
+    z-index: 9;
+    right: 20px;
+    top: 20px;
+  `
+
+  const Close: any = styled.div`
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    right: 15px;
+    top: 15px;
+    cursor: pointer;
+  `
+
+  const intlZh = {
+    pending: "待确认",
+    confirmed: "已确认",
+    failed: "失败",
+  }
+
+  const intlEn = {
+    pending: "Pending",
+    confirmed: "Confirmed",
+    failed: "Failed",
+  }
+
+  const intl = lang === 'zh' ? intlZh: intlEn;
+
+  let description = intl.pending;
+  if (status === 2) description = intl.confirmed;
+  if (status === 3) description = intl.failed;
+
+  const notifyContent = <Notification className="wg-notify-root">
+    <div className="message">{intlObj.title}</div>
+    <div className="description">{getDescription(status, item, description)}</div>
+    <Close className="trans-notify-close"><CloseOutlined /></Close>
+  </Notification>
+
+  let container: any = document.querySelector('.wg-notify-root');
+  if (!container) {
+    container = document.createElement('div');
+    container.classList.add('wg-notify-root');
+    container.innerHTML = renderToString(notifyContent);
+    document.body.appendChild(container);
+  } else {
+    container.innerHTML = renderToString(notifyContent);
+  }
+  container.style.display = 'block';
+
+  let closeIcon: any = document.querySelector('.trans-notify-close');
+  closeIcon.onclick = () => { container.style.display = 'none'; }
+
+  saveTransactions(item);
+
+  setTimeout(() => {
+    container.style.display = 'none';
+  }, status === 3 ? 30000 : 5000);
+};
+
+export const saveTransactions = (record: any, tronweb: any = null) => {
+  const { tx } = record;
+  const tronWeb = tronweb || (window as any).tronWeb;
+  let data = window.localStorage.getItem(`${tronWeb.defaultAddress.base58}_transaction`) || '[]';
+  let dataArr = JSON.parse(data);
+  let pos: string | number = 'true';
+  dataArr.map((item: { tx: any; }, index: number) => {
+    if (item.tx === tx) {
+      pos = index;
+    }
+  });
+  if (pos === 'true') {
+    return;
+  }
+  dataArr[pos] = record;
+  window.localStorage.setItem(`${tronWeb.defaultAddress.base58}_transaction`, JSON.stringify(dataArr));
+};
+
+export const setVariablesInterval = () => {
+  let interval = null;
+  if (!interval) {
+    interval = setInterval(async () => {
+      try {
+        checkPendingTransactions();
+      } catch (err) {
+        console.log('interval error:' + err);
+      }
+    }, 3000);
   }
 };
