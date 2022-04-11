@@ -1,3 +1,7 @@
+import axios from 'axios';
+import _ from 'lodash';
+import BigNumber from 'bignumber.js';
+
 export const getKeys = (byUrl: { [x: string]: { name: number; }; }) => {
   try {
     const keys = Object.keys(byUrl);
@@ -10,136 +14,212 @@ export const getKeys = (byUrl: { [x: string]: { name: number; }; }) => {
   }
 };
 
-export const setTokenList = async (type: number, cb = null) => {
-  const isSwap = type === 1 || type === 2;
+export const randomSleep = (time = 1000) => {
+  return new Promise<void>((reslove) => {
+    const timeout = parseInt((Math.random() * time).toString());
+    setTimeout(() => {
+      reslove();
+    }, timeout);
+  });
+};
+
+export const reTry: any = async (func: any) => {
   try {
-    const { byUrl = {}, selectedListUrl = '', solor = [] } = this;
-    let allList = byUrl[selectedListUrl].tokens || [];
-    const allListUnique = _.uniqBy(allList, 'address');
-    if (allListUnique.length != allList.length) {
-      allList = [];
-    }
-    let isToken = byUrl[selectedListUrl].isToken;
-    if (isToken === undefined) {
-      isToken = await ApiScanClient.isToken(allList.map(item => item.address));
+    await randomSleep(1000);
+    return await func();
+  } catch (error) {
+    console.log(error);
+    await randomSleep(3000);
+    return await reTry(func);
+  }
+};
 
-      byUrl[selectedListUrl].isToken = Number(isToken);
-      await this.updateByUrl(byUrl[selectedListUrl]);
-    }
-    if (Number(isToken) === 2) {
-      allList = [];
-    }
-    const trxData = {
-      tokenAddress: Config.trxFakeAddress,
-      address: '',
-      addressV1: '',
-      addressV2: '',
-      tokenSymbol: 'TRX',
-      tokenLogoUrl: trxLogoUrl,
-      tokenName: 'TRX',
-      tokenDecimal: Config.trxDecimal,
-      balance: this.rootStore.network.trxBalance
-    };
-    const { exchanges = {}, allExchanges = {} } = this;
-    let list = [];
-    let tokenData = {};
-    if (isSwap) {
-      tokenData = this.swapToken;
+export const isToken = async (tokens: any[], tronweb = null) => {
+  const tronWeb = tronweb || (window as any).tronWeb;
+  const res = await tronWeb.fullNode;
+  const { host } = res;
+  const apiUrl = host === 'https://api.trongrid.io' ? 'https://abc.ablesdxd.link/swap' : 'http://123.56.166.152:10088/swap';
+
+  const _getData = async () => {
+    const res = await axios.get(`${apiUrl}${isToken}`, { params: { addrs: tokens.join(',') } });
+    if (res.data.code === 0) {
+      const data = res.data.data || {};
+      const arr = Object.keys(data);
+      return arr.some(item => !data[item]) ? 2 : 1;
     } else {
-      tokenData = this.liqToken;
+      return 1;
     }
-    allList.map(item => {
-      if (item.address) {
-        list.push({
-          tokenAddress: item.address,
-          address: exchanges[item.address] ? exchanges[item.address].e : null,
-          addressV1:
-            allExchanges && allExchanges[0] && allExchanges[0][item.address] ? allExchanges[0][item.address].e : null,
-          addressV2:
-            allExchanges && allExchanges[1] && allExchanges[1][item.address] ? allExchanges[1][item.address].e : null,
-          tokenSymbol: item.symbol || '',
-          tokenLogoUrl: item.logoURI || defaultLogoUrl,
-          tokenName: item.name || '',
-          tokenDecimal: item.decimals,
-          // exchanges[item.address] && exchanges[item.address].d ? Number(exchanges[item.address].d) : item.decimals,
-          balance: tokenData.tokenMap[item.address] ? tokenData.tokenMap[item.address].balance : '-'
-        });
-      }
-    });
-    const newSolor = solor.slice();
-    // console.log(newSolor, allExchanges[1])
-    solor.map(token => {
-      const findIndex = _.findIndex(list, item => {
-        return item.tokenAddress === token.tokenAddress;
-      });
-      if (findIndex >= 0) {
-        _.remove(newSolor, itm => {
-          return itm.tokenAddress === token.tokenAddress;
-        });
-      }
-    });
-    list = [trxData].concat(newSolor, list);
-    const allTokenList = [];
-    const tokenList = [];
-    const tokenMap = {};
-    list.map(token => {
-      allTokenList.push(token);
-      tokenList.push(token.tokenAddress);
-      tokenMap[token.tokenAddress] = token;
-    });
+  };
+  return reTry(_getData);
+}
 
-    if (isSwap) {
-      this.swapToken.allTokenList = [...allTokenList];
-      this.swapToken.tokenMap = { ...tokenMap };
-      this.getTokenBalance(tokenList, this.swapToken.tokenMap);
-    } else {
-      this.liqToken.allTokenList = [...allTokenList];
-      this.liqToken.tokenMap = { ...tokenMap };
-      this.getTokenBalance(tokenList, this.liqToken.tokenMap);
+export const getTrxBalance = async (address: string, tronweb = null) => {
+  try {
+    const tronWeb = tronweb || (window as any).tronWeb;
+    const balance = await tronWeb.trx.getBalance(address);
+    return new BigNumber(balance).div(1e6);
+  } catch (err) {
+    console.log(`getTrxBalance: ${err}`, address);
+    return '--';
+  }
+};
+
+export const getLastestTokenList = async (uri: string) => {
+  try {
+    const res = await axios.get(uri);
+    const obj = res && res.data ? res.data : null;
+    if (typeof obj !== 'object' || obj === null) {
+      return null;
     }
-    this.searchTokenList(type);
+    return { ...res.data, uri };
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
+};
 
-    cb && cb();
+export const updateByUrl = async (item: any) => {
+  try {
+    let listsData = getTokensDataFromLocal();
+    const oldItem = listsData.byUrl[item.uri];
+    if (item.isToken === undefined) {
+      item.isToken = await isToken(item.tokens.map((t: { address: any; }) => t.address));
+    }
+    listsData.byUrl[item.uri] = { ...oldItem, ...item };
+    setTokensDataIntoLocal(listsData);
   } catch (err) {
     console.log(err);
   }
 };
 
-export const getTokenListJson = async (tokens = []) => {
+export const getVersion = (v: { major?: 0 | undefined; minor?: 0 | undefined; patch?: 0 | undefined; }) => {
   try {
-    const jsonPromises = [];
-    tokens.map(item => {
-      item.uri = item.uri.trim();
-      jsonPromises.push(ApiScanClient.getTokenListJson(item.uri));
-    });
-    if (this.byUrl && Object.keys(this.byUrl).length > 0) {
-      Object.keys(this.byUrl).map(key => {
-        if (!!this.byUrl[key].cst) {
-          jsonPromises.push(ApiScanClient.getTokenListJson(this.byUrl[key].uri));
-        }
-      });
+    const { major = 0, minor = 0, patch = 0 } = v;
+    return String(major) + '.' + String(minor) + '.' + String(patch);
+  } catch (err) {
+    console.log(err);
+    return '';
+  }
+};
+
+export const checkVersionLater = (o: any, n: any) => {
+  try {
+    if (Number(n.major) > Number(o.major)) {
+      return true;
     }
+    if (Number(n.minor) > Number(o.minor)) {
+      return true;
+    }
+    if (Number(n.patch) > Number(o.patch)) {
+      return true;
+    }
+    return false;
+  } catch (err) {
+    console.log(err);
+    return false;
+  }
+};
+
+export const checkTokenChanged = (o: any, n: any, maxTokens = 100) => {
+  try {
+    const res = {
+      success: false,
+      addTokens: [],
+      delTokens: [],
+      updateTokens: []
+    };
+    const oVersion = o.version;
+    const nVersion = n.version;
+    const isVersionLater = checkVersionLater(oVersion, nVersion);
+    if (!isVersionLater) {
+      return res;
+    }
+    // If the number of tokens exceeds 100, no prompt will be given
+    if (n.tokens.length > maxTokens) {
+      return res;
+    }
+    const oTokens = o.tokens.slice() || [];
+    const delTokensInit = o.tokens.slice() || [];
+    const nTokens = n.tokens.slice() || [];
+    const addTokensInit = n.tokens.slice() || [];
+    _.pullAllWith(delTokensInit, nTokens, _.isEqual);
+    _.pullAllWith(addTokensInit, oTokens, _.isEqual);
+    const updateTokens = _.intersectionBy(addTokensInit, delTokensInit, 'address');
+    const addTokens = _.xorBy(addTokensInit, updateTokens, 'address');
+    const delTokens = _.xorBy(delTokensInit, updateTokens, 'address');
+    if (addTokens.length || delTokens.length || updateTokens.length) {
+      return {
+        success: true,
+        addTokens,
+        delTokens,
+        updateTokens
+      };
+    }
+    return res;
+  } catch (err) {
+    return {
+      success: false
+    };
+  }
+};
+
+export const handleNotifiction = async (listsData: { byUrl: any; selectedListUrl: any; }, byUrlNew: { [x: string]: any; }) => {
+    try {
+      const { byUrl, selectedListUrl } = listsData;
+      const o = byUrl[selectedListUrl];
+      const n = byUrlNew[selectedListUrl];
+      const oVersion = o.version;
+      const nVersion = n.version;
+      const { success = false, addTokens, delTokens, updateTokens } = checkTokenChanged(o, n);
+      let notificationInfo = {};
+      if (success) {
+        notificationInfo = {
+          addTokens,
+          delTokens,
+          updateTokens,
+          versionOld: getVersion(oVersion),
+          versionNew: getVersion(nVersion),
+          categoryName: o.name,
+        };
+      }
+      return notificationInfo;
+    } catch (err) {
+      console.log(err);
+      return {};
+    }
+  };
+
+export const getTokenListJson = async (tokens = [], { maxLists = 20 }) => {
+  try {
+    // You need to get all the latest data, and compare it with the local cached version. If there is a version update, the information will be returned
+    let listsData = getTokensDataFromLocal();
+    const jsonPromises: any[] = [];
+    tokens.map((item: any) => {
+      item.uri = item.uri.trim();
+      jsonPromises.push(getLastestTokenList(item.uri));
+    });
     let res = await Promise.all(jsonPromises);
-    const resObj = {};
+    const resObj: any = {};
     res.map(r => {
       resObj[r.uri] = { ...r };
     });
-    this.byUrlNew = resObj;
-    tokens.map((item, i) => {
+    const byUrlNew = resObj;
+    tokens.map((item: any, i) => {
       const uri = item.uri;
-      if (resObj[uri] && !this.byUrl[uri]) {
-        if (Object.keys(this.byUrl).length < Config.maxLists) {
-          this.byUrl[uri] = { ...item, ...resObj[uri] };
-          if (!this.selectedListUrl && Number(item.defaultList) === 1) {
-            this.selectedListUrl = uri;
+      if (resObj[uri] && !listsData.byUrl[uri]) {
+        // If there is no local cache, it is directly added, that is, the newly added list has no update prompt.
+        if (Object.keys(listsData.byUrl).length < maxLists) {
+          listsData.byUrl[uri] = { ...item, ...resObj[uri] };
+          if (!listsData.selectedListUrl && Number(item.defaultList) === 1) {
+            listsData.selectedListUrl = uri;
           }
         }
       }
       if (i === tokens.length - 1) {
-        this.setTokensDataIntoLocal();
+        setTokensDataIntoLocal(listsData);
       }
     });
-    this.handleNotifiction();
+    handleNotifiction(listsData, byUrlNew);
   } catch (err) {
     console.log(err);
   }
@@ -148,76 +228,51 @@ export const getTokenListJson = async (tokens = []) => {
 export const getTokensDataFromLocal = () => {
   try {
     if (!window.localStorage.getItem('simpleLists')) return;
-    const simpleListsStr = window.localStorage.getItem('simpleLists');
+    const simpleListsStr = window.localStorage.getItem('simpleLists') || '';
     const simpleLists = JSON.parse(simpleListsStr);
     const { byUrl = {}, selectedListUrl = '' } = simpleLists;
     const keyArr = Object.keys(byUrl);
-    let res = {};
-    keyArr.map(item => {
+    let res: any = {};
+    keyArr.map((item: any) => {
       if (byUrl[item].name !== 'JustSwap Default List') {
         res[item] = byUrl[item];
       }
     });
-    // this.byUrl = byUrl;
-    this.byUrl = res;
+    let listsData: any = {};
+    listsData.byUrl = res;
 
-    // this.selectedListUrl = selectedListUrl;
     if (!res[selectedListUrl]) {
-      this.selectedListUrl = keyArr[0];
+      listsData.selectedListUrl = keyArr[0];
     } else {
-      this.selectedListUrl = selectedListUrl;
+      listsData.selectedListUrl = selectedListUrl;
     }
-    if (!window.localStorage.getItem('solor')) return;
-    const solorStr = window.localStorage.getItem('solor');
-    this.solor = JSON.parse(solorStr);
+    return listsData;
   } catch (err) {
     console.log(err);
+    return {};
   }
 };
 
-export const setTokensDataIntoLocal = () => {
+export const setTokensDataIntoLocal = (listsData: any) => {
   try {
-    const simpleLists = {
-      byUrl: this.byUrl,
-      // lastInitializedList: this.lastInitializedList,
-      selectedListUrl: this.selectedListUrl
-    };
-    window.localStorage.setItem('simpleLists', JSON.stringify(simpleLists));
+    window.localStorage.setItem('simpleLists', JSON.stringify(listsData));
   } catch (err) {}
 };
 
-export const updateTokensData = (selectedListUrl, jsonData) => {
+export const updateTokensData = (selectedListUrl: string | number, jsonData: { tm: number; }) => {
   try {
-    this.selectedListUrl = selectedListUrl;
-    jsonData.cst = true;
+    let listsData = getTokensDataFromLocal();
+    listsData.selectedListUrl = selectedListUrl;
     jsonData.tm = Date.now();
-    this.byUrl[selectedListUrl] = jsonData;
-    // this.lastInitializedList.push(selectedListUrl);
-    this.setTokensDataIntoLocal();
+    listsData.byUrl[selectedListUrl] = jsonData;
+    setTokensDataIntoLocal(listsData);
   } catch (err) {
     console.log(err);
   }
 };
 
-export const updateByUrl = async item => {
-  try {
-    const oldItem = this.byUrl[item.uri];
-    if (item.isToken === undefined) {
-      item.isToken = await ApiScanClient.isToken(item.tokens.map(t => t.address));
-    }
-    this.byUrl[item.uri] = { ...oldItem, ...item };
-    this.setTokensDataIntoLocal();
-  } catch (err) {
-    console.log(err);
-  }
-};
-
-export const updateByUrlNew = n => {
-  const on = this.byUrlNew[n.uri] || {};
-  this.byUrlNew[n.uri] = { ...on, ...n };
-};
-
-export const deleteByUrlById = uri => {
-  delete this.byUrl[uri];
-  this.setTokensDataIntoLocal();
+export const deleteByUrlById = (uri: string | number) => {
+  let listsData = getTokensDataFromLocal();
+  delete listsData.byUrl[uri];
+  setTokensDataIntoLocal(listsData);
 };
