@@ -54,7 +54,6 @@
   },
   "dependencies": {
     "axios": "^0.26.1",
-    "bignumber.js": "^9.0.2",
     "lodash": "^4.17.21"
   }
 }
