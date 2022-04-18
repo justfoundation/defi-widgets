@@ -10,11 +10,11 @@ function App() {
   const trxPrecision = 1e6;
 
   useEffect(() => {
-    initTronLinkWallet();
+    activate();
   }, [])
 
-  const initTronLinkWallet = async () => {
-    const tronWeb = await TronWebConnector.initTronLinkWallet();
+  const activate = async () => {
+    const tronWeb = await TronWebConnector.activate();
 
     if (tronWeb?.defaultAddress) {
       setDefaultAccount(tronWeb.defaultAddress.base58);
@@ -25,8 +25,11 @@ function App() {
     }
   }
 
-  const login = () => {
-    TronWebConnector.activate();
+  const addListener = () => {
+    TronWebConnector.on('accountsChanged', res => {
+      if (res.action === 'accountsChanged')
+      console.log('Current account address is: ', res.data.address);
+    })
   }
 
   return (
@@ -36,9 +39,10 @@ function App() {
           <>
             <div><span style={{ fontSize: '18px' }}>Current account: </span>{defaultAccount}</div>
             <div style={{ marginTop: '10px' }}><span style={{ fontSize: '18px' }}>Current account balance: </span>{defaultAccountBalance.toString()} TRX</div>
+            <button onClick={() => addListener()} style={{ marginTop: '10px' }}>On accountsChanged</button>
           </>
           :
-          <button onClick={() => login()}>Connect Wallet</button>
+          <button onClick={() => activate()}>Connect Wallet</button>
         }
       </header>
     </div>
