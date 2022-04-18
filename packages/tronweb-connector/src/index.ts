@@ -29,7 +29,7 @@ export class Connector {
     return result;
   };
 
-  errorMessage = (msg: string) => {
+  private errorMessage = (msg: string) => {
     const error: ResultType = { success: false, msg };
     return error;
   };
@@ -117,8 +117,7 @@ export class Connector {
       this.on('connectWeb', this.connectListener);
       return tron;
     } catch (e) {
-      const error = this.errorMessage(`error: ${e}`);
-      return error;
+      return this.errorMessage(`error: ${e}`);
     }
   };
 
