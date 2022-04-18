@@ -52,7 +52,7 @@ export class Connector {
       // Access the decentralized web!
       const tronWeb = tronLink.tronWeb;
       return tronWeb;
-    } else if (login){
+    } else if (login) {
       const res = await tronLink.request({ method: 'tron_requestAccounts' });
       if (res.code === 200) {
         const tronWeb = tronLink.tronWeb;
@@ -116,6 +116,7 @@ export class Connector {
       const tron = Promise.race([tronlinkPromise, appPromise]).then(res => {
         return self.handleTronWallet(res, login);
       });
+      console.log(tron, 'trontron');
 
       this.on('accountsChanged', this.accountsChangedListener);
       this.on('setAccount', this.setAccountListener);
@@ -148,7 +149,7 @@ export class Connector {
 
   activate = async () => {
     return await this.initTronLinkWallet(true);
-  }
+  };
 }
 
 export const TronWebConnector = new Connector();
