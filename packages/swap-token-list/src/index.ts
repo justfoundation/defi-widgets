@@ -182,7 +182,7 @@ export class TokenList {
       return this.isNotEmptyString(symbol) && !this.hasSpace(symbol);
     },
     decimals: (decimals: number) => {
-      return this.isGteZeroInteger(decimals) && decimals <= 256;
+      return this.isPositiveInteger(decimals) && decimals <= 256;
     },
     logoURI: (logoURI: string) => {
       return this.isValidURL(logoURI);
@@ -216,11 +216,6 @@ export class TokenList {
     return flag;
   };
 
-  private isGteZeroInteger = (num: number, tronweb = null) => {
-    const tronWeb = tronweb || (window as any).tronWeb;
-    return typeof num === 'number' && tronWeb.utils.isInteger(num) && num >= 0;
-  };
-
   private jsonValidate: any = {
     name: (name: any) => {
       return this.isNotEmptyString(name);
@@ -235,12 +230,12 @@ export class TokenList {
       return this.tokensValidate(tokens);
     },
     version: (version: { major: any; minor: any; patch: any; }, tronweb = null) => {
-    const tronWeb = tronweb || (window as any).tronWeb;
-    return (
+      const tronWeb = tronweb || (window as any).tronWeb;
+      return (
         tronWeb.utils.isObject(version) &&
-        this.isGteZeroInteger(version.major) &&
-        this.isGteZeroInteger(version.minor) &&
-        this.isGteZeroInteger(version.patch)
+        this.isPositiveInteger(version.major) &&
+        this.isPositiveInteger(version.minor) &&
+        this.isPositiveInteger(version.patch)
       );
     }
   };
