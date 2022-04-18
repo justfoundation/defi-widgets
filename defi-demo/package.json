@@ -11,8 +11,12 @@
     "@widgets/transaction-confirm": "../packages/transaction-confirm/",
     "@widgets/tronweb-connector": "file:../packages/tronweb-connector",
     "bignumber.js": "^9.0.2",
+    "query-string": "^7.1.1",
+    "querystring-es3": "^0.2.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
+    "tronweb": "^3.2.6",
+    "url-loader": "^4.1.1",
     "react-router-dom": "^6.2.2",
     "react-scripts": "5.0.0",
     "sass": "^1.49.9",
@@ -41,5 +45,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "sass": "^1.50.0",
+    "sass-loader": "^12.6.0",
+    "webpack": "^5.72.0"
   }
 }

@@ -1,35 +1,84 @@
 .App {
-  text-align: center;
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-
-  a {  
-    color: white;
-  }
-
-  .menu {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-
-    a {
-      margin-top: 10px;
-    }
-  }
-
-  .logged {
+    text-align: center;
+    background-color: #282c34;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
+    font-size: calc(10px + 2vmin);
+    color: white;
 
-    button {
-      margin-top: 15px;
+    a {
+        color: white;
     }
-  }
+
+    .menu {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+
+        a {
+            margin-top: 10px;
+        }
+    }
+
+    .logged {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        button {
+            margin-top: 15px;
+        }
+    }
+}
+
+.confirm {
+    > div {
+        width: 450px;
+        margin: 0 auto;
+        text-align: left;
+    }
+}
+
+.wg-trans-notify,
+.notification {
+    position: fixed !important;
+    z-index: 1010;
+    top: 24px;
+    right: 24px;
+    padding: 16px 24px;
+    border-radius: 15px;
+    box-shadow: 0px 20px 40px rgb(148 148 148 / 6%);
+    background: #fff;
+    width: 384px;
+    max-width: calc(100vw - 24px * 2);
+    color: rgba(0, 0, 0, 0.85);
+    font-size: 16px;
+    display: flex;
+    flex-direction: column-reverse;
+    font-family: 'Lato', 'PingFang', sans-serif;
+    a {
+        color: #5916e1;
+        font-size: 14px;
+    }
+}
+
+.trans-confirmed {
+    font-weight: 500;
+}
+.wg-trans-notify {
+    .wg-notify-ques {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        background: #e5dcdc;
+        font-size: 12px;
+        text-align: center;
+        line-height: 18px;
+        border-radius: 8px;
+        color: #1a1616;
+        margin-right: 6px;
+    }
 }

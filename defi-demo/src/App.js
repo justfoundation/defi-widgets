@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import './App.scss';
 
 function App() {
-  return (
+return (
     <div className="App">
       <section className="menu">
         <h3>Menu: </h3>

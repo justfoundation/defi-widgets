@@ -2,7 +2,13 @@
 export class Contract {
   public feeLimitCommon: number = 400000000;
 
-  trigger = async (address: any, functionSelector: any, options = {}, parameters = [], tronweb: any) => {
+  trigger = async (
+    address: any,
+    functionSelector: any,
+    options = {},
+    parameters = [],
+    tronweb: any
+  ) => {
     try {
       const tronWeb = tronweb || (window as any).tronWeb;
       if (!tronWeb.defaultAddress) return;
@@ -14,7 +20,9 @@ export class Contract {
       );
 
       if (!transaction.result || !transaction.result.result) {
-        throw new Error('Unknown trigger error: ' + JSON.stringify(transaction.transaction));
+        throw new Error(
+          'Unknown trigger error: ' + JSON.stringify(transaction.transaction)
+        );
       }
       return transaction;
     } catch (error) {
@@ -31,7 +39,7 @@ export class Contract {
     } catch (error) {
       console.log(error, 'signerr');
     }
-  }
+  };
 
   broadCast = async (signedTransaction: any, tronweb: any) => {
     try {
@@ -44,7 +52,14 @@ export class Contract {
     }
   };
 
-  send = async (address: any, functionSelector: any, parameters = [], options = {}, callbacks: () => any = () => {}, tronWeb: any) => {
+  send = async (
+    address: any,
+    functionSelector: any,
+    parameters = [],
+    options = {},
+    callbacks: () => any = () => {},
+    tronWeb: any
+  ) => {
     try {
       const transaction = await this.trigger(
         address,
@@ -54,11 +69,14 @@ export class Contract {
         tronWeb
       );
 
-      const signedTransaction = await this.sign(transaction?.transaction, tronWeb);
+      const signedTransaction = await this.sign(
+        transaction?.transaction,
+        tronWeb
+      );
       const result = await this.broadCast(signedTransaction, tronWeb);
 
       if (result?.result) callbacks && callbacks();
-      
+
       return result;
     } catch (error) {
       console.log(error);
@@ -66,7 +84,13 @@ export class Contract {
     }
   };
 
-  call = async (address: any, functionSelector: any, parameters = [], options = {}, tronweb: any) => {
+  call = async (
+    address: any,
+    functionSelector: any,
+    parameters = [],
+    options = {},
+    tronweb: any
+  ) => {
     try {
       const tronWeb = tronweb || (window as any).tronWeb;
       if (!tronWeb.defaultAddress) return;
@@ -83,11 +107,19 @@ export class Contract {
     }
   };
 
-  deploy = async (options: any, address: any, callbacks: () => any, tronweb: any) => {
+  deploy = async (
+    options: any,
+    address: any,
+    callbacks: () => any,
+    tronweb: any
+  ) => {
     try {
       const tronWeb = tronweb || (window as any).tronWeb;
       if (!tronWeb.defaultAddress) return;
-      const transaction = await tronWeb.transactionBuilder.createSmartContract(options, address);
+      const transaction = await tronWeb.transactionBuilder.createSmartContract(
+        options,
+        address
+      );
       const signedTransaction = await this.sign(transaction, tronWeb);
       const result = await this.broadCast(signedTransaction, tronWeb);
 
@@ -96,9 +128,16 @@ export class Contract {
     } catch (error) {
       console.log(error);
     }
-  }
+  };
 
-  sendTrx = async (toAddress: any, amount: any, fromAddress: any, options: any, callbacks: any, tronweb: any) => {
+  sendTrx = async (
+    toAddress: any,
+    amount: any,
+    fromAddress: any,
+    options: any,
+    callbacks: any,
+    tronweb: any
+  ) => {
     try {
       const tronWeb = tronweb || (window as any).tronWeb;
       if (!tronWeb.defaultAddress) return;
@@ -117,13 +156,25 @@ export class Contract {
     } catch (error) {
       console.log(error);
     }
-  }
+  };
 
-  sendToken = async (address: any, amount: any, tokenID: any, privateKey:string = '', callbacks:any, tronweb: any) => {
+  sendToken = async (
+    address: any,
+    amount: any,
+    tokenID: any,
+    privateKey: string = '',
+    callbacks: any,
+    tronweb: any
+  ) => {
     try {
       const tronWeb = tronweb || (window as any).tronWeb;
       if (!tronWeb.defaultAddress) return;
-      const tradeObj = await tronWeb.trx.sendToken(address, amount, tokenID, privateKey && privateKey);
+      const tradeObj = await tronWeb.trx.sendToken(
+        address,
+        amount,
+        tokenID,
+        privateKey && privateKey
+      );
 
       const signedTransaction = await this.sign(tradeObj, tronWeb);
       const result = await this.broadCast(signedTransaction, tronWeb);
@@ -133,7 +184,7 @@ export class Contract {
     } catch (error) {
       console.log(error);
     }
-  }
+  };
 }
 
 export const ContractInteract = new Contract();
