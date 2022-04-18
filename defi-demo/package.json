@@ -6,11 +6,18 @@
     "@testing-library/jest-dom": "^5.16.2",
     "@testing-library/react": "^12.1.3",
     "@testing-library/user-event": "^13.5.0",
-    "@widgets/tronweb-connector": "file:../packages/tronweb-connector",
+    "@widgets/contract-interact": "file:widgets-contract-interact-0.1.0.tgz",
+    "@widgets/tronweb-connector": "file:widgets-tronweb-connector-0.1.0.tgz",
     "bignumber.js": "^9.0.2",
+    "query-string": "^7.1.1",
+    "querystring-es3": "^0.2.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
+    "react-router-dom": "^6.3.0",
     "react-scripts": "5.0.0",
+    "transaction-confirm": "file:transaction-confirm-0.1.0.tgz",
+    "tronweb": "^3.2.6",
+    "url-loader": "^4.1.1",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
@@ -36,5 +43,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "sass": "^1.50.0",
+    "sass-loader": "^12.6.0",
+    "webpack": "^5.72.0"
   }
 }
