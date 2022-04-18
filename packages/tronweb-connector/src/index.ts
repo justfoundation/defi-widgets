@@ -37,7 +37,7 @@ export class Connector {
   handleTronWallet = async (tron: any, login?: boolean) => {
     if (!tron) {
       const error = this.errorMessage({
-        message: `error: Didn't get tronweb`,
+        message: `error: tronweb not provided`,
         name: 'error',
       });
       return error;
