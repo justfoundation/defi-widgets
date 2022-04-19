@@ -66,32 +66,47 @@ function App() {
         try {
             //   if (!this.rootStore.network.defaultAccount) return; // 如果没登录，禁止所有交易操作触发
             OpenTransModal({ step: 1 }, intlObj);
+            // console.log('address', address, 'functionSelector', functionSelector, 'parameters', parameters);
             const transaction = await trigger(
                 address,
                 functionSelector,
                 Object.assign({ feeLimit: feeLimitCommon }, options),
                 parameters
             );
-            console.log(transaction, 'transaction');
+            // console.log(transaction, 'transaction');
+            if (!transaction.result || !transaction.result.result) {
+                throw new Error('Unknown trigger error: ' + JSON.stringify(transaction.transaction));
+            }
+
             const signedTransaction = await sign(transaction.transaction);
+            if (!signedTransaction) {
+                OpenTransModal({ step: 3 }, intlObj);
+                // getDescriptionFn(3, { obj: { value: 0.1, symbol: 'SUN' }, title: '授权失败' });
+                return;
+            }
             console.log(signedTransaction, 'signedTransaction');
+
             const result = await broadCast(signedTransaction);
+
             if (!intlObj.continuous) {
                 console.log(result, 'result', intlObj);
                 OpenTransModal({ step: 2, txId: result.transaction.txID }, intlObj);
             }
+
             if (result && result.result) {
                 setTransactionsData(result.transaction.txID, intlObj);
+            } else {
+                OpenTransModal({ step: 3 }, intlObj);
+                return;
             }
 
-            // callbacks && this.executeCallback(callbacks);
+            callbacks && callbacks();
             return result;
         } catch (error) {
-            console.log(11122223333, error);
             if (error) {
-                // if (error && error.message == 'Confirmation declined by user') {
-                // this.openTransModal({ ...intlObj, step: 3 });
-                OpenTransModal({ step: 3 }, intlObj);
+                if (error && error.message == 'Confirmation declined by user') {
+                    openTransModal({ step: 3 }, intlObj);
+                }
             }
             console.log(`trigger error ${address} - ${functionSelector}`, error.message ? error.message : error);
             return {};
@@ -115,10 +130,10 @@ function App() {
         if (txId) {
             setTxID(txId);
             setIntlObj(intlObj);
-            getDescriptionFn(1, intlObj);
+            getDescriptionFn(1, intlObj, txId);
             setTimeout(() => {
                 // props.cb();
-                getDescriptionFn(2, intlObj);
+                getDescriptionFn(2, intlObj, txId);
             }, 5000);
         }
     };
@@ -147,37 +162,51 @@ function App() {
     };
     // 2
     const setTransactionsDataFn = () => {
-        setTransactionsData(txID, intlObj);
+        if (txID) {
+            setTransactionsData(txID, intlObj);
+            console.log('SetTransactionsData', { txID, intlObj });
+        } else {
+            console.log('SetTransactionsData Error: No Transactions');
+        }
     };
     // 3
     const getTransactionInfoFn = async () => {
-        console.log(txID, 'getTransactionInfoFn');
+        // console.log(txID, 'getTransactionInfoFn');
         let result = await getTransactionInfo(txID);
         setTransaction(result);
-        console.log(result, 'getTransactionInfo');
+        console.log('GetTransactionInfo', result);
     };
     // 4
-    const getDescriptionFn = async (status = 1, customObj = intlObj) => {
+    const getDescriptionFn = async (status = 1, customObj = intlObj, tx = txID) => {
         let result = await getDescription(
             status,
             {
-                tx: txID,
+                tx,
                 lang: 'zh'
             },
             customObj.title
         );
         setDescription(result);
-        console.log(result, 'getDescriptionFn', customObj, status);
+        console.log('GetDescription', result, customObj, status);
     };
 
     // 5
     const checkPendingTransactionsFn = async () => {
         checkPendingTransactions();
+        console.log('CheckPendingTransactions');
     };
 
     // 6
-    const logTransactionFn = async () => {
-        logTransaction({ checkCnt: 0, customObj: intlObj, showPending: true, status: 1, title: '', tx: txID });
+    const logTransactionFn = async (status = 1) => {
+        logTransaction({ checkCnt: 0, customObj: intlObj, showPending: true, status, title: '', tx: txID }, status);
+        console.log('LogTransaction: ', {
+            checkCnt: 0,
+            customObj: intlObj,
+            showPending: true,
+            status,
+            title: '',
+            txID
+        });
     };
 
     // 7
@@ -190,11 +219,20 @@ function App() {
             title: 'saveTransactions',
             tx: txID
         });
+        console.log('SaveTransactions: ', {
+            checkCnt: 0,
+            customObj: intlObj,
+            showPending: true,
+            status: 1,
+            title: 'saveTransactions',
+            txID
+        });
     };
 
     // 8
     const setVariablesIntervalFn = async () => {
         setVariablesInterval();
+        console.log('SetVariablesInterval');
     };
 
     return (
@@ -205,15 +243,23 @@ function App() {
             <br />
             <div onClick={getTransactionInfoFn}>3. GetTransactionInfo</div>
             <br />
-            <div onClick={e => getDescriptionFn(3, intlObj)}>4. GetDescription</div>
+            <div onClick={e => getDescriptionFn(1, intlObj)}>4. GetDescription（status=1）</div>
             <br />
-            <div onClick={checkPendingTransactionsFn}>5. CheckPendingTransactions</div>
+            <div onClick={e => getDescriptionFn(2, intlObj)}>5 GetDescription（status=2）</div>
             <br />
-            <div onClick={e => logTransactionFn()}>6. LogTransaction</div>
+            <div onClick={e => getDescriptionFn(3, intlObj)}>6. GetDescription（status=3）</div>
             <br />
-            <div onClick={saveTransactionsFn}>7. SaveTransactions</div>
+            <div onClick={checkPendingTransactionsFn}>7. CheckPendingTransactions</div>
             <br />
-            <div onClick={setVariablesIntervalFn}>8. SetVariablesInterval</div>
+            <div onClick={e => logTransactionFn(1)}>8. LogTransaction（status=1）</div>
+            <br />
+            <div onClick={e => logTransactionFn(2)}>9. LogTransaction（status=2）</div>
+            <br />
+            <div onClick={e => logTransactionFn(3)}>10. LogTransaction（status=3）</div>
+            <br />
+            <div onClick={saveTransactionsFn}>11. SaveTransactions</div>
+            <br />
+            <div onClick={setVariablesIntervalFn}>12. SetVariablesInterval</div>
             <div className="wg-modal-root"></div>
             <div className="wg-notify-ques"></div>
             <div className="wg-notify-errTip"></div>
