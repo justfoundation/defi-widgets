@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../App.scss';
 import BigNumber from 'bignumber.js';
 import {
@@ -10,7 +10,7 @@ import {
     logTransaction,
     saveTransactions,
     setVariablesInterval
-} from 'transaction-confirm';
+} from '@widgets/transaction-confirm';
 // import { triggerSmartContract, sign, sendRawTransaction, MAX_UINT256 } from '../utils/blockchain';
 import { ContractInteract } from '@widgets/contract-interact';
 const { trigger, sign, broadCast, send } = ContractInteract;

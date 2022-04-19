@@ -21,16 +21,11 @@ interface CustomObjType {
 export const OpenTransModal = async (
   stepInfo = { step: 0, txId: '' },
   customObj: CustomObjType = {},
-  tronweb = null
 ) => {
+  const tronscanLink = 'https://tronscan.io/#';
   const { step, txId } = stepInfo;
 
   if (!step) return;
-
-  const tronWeb = tronweb || (window as any).tronWeb;
-  const res = await tronWeb.fullNode;
-  const { host } = res;
-  const trongridNode = host === 'https://api.trongrid.io';
 
   const TransMask: any = styled.div`
     position: fixed;
@@ -159,11 +154,7 @@ export const OpenTransModal = async (
                 <div className="trans-modal-tips trans-modal-submit-tips">
                   <a
                     className="typo-text-link"
-                    href={`${
-                      trongridNode
-                        ? 'https://tronscan.io/#'
-                        : 'https://nile.tronscan.io/#'
-                    }/transaction/${txId}`}
+                    href={`${tronscanLink}/transaction/${txId}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -262,8 +253,8 @@ export const getDescription = async (
   type: number,
   item: any,
   text: string,
-  tronweb = null
 ) => {
+  const tronscanLink = 'https://tronscan.io/#';
   const { tx, lang, view_on_tronscan } = item;
   let className = '';
   let statusText = '';
@@ -292,10 +283,6 @@ export const getDescription = async (
       'Failure may be caused by the following situations, please check if:<br />①your Energy or bandwidth is insufficient; please top up<br />②your slippage is too low; please reset<br />③your current network is congested; please try again later<br />④your system time is incorrect; please check and try again',
   };
   const intl = lang === 'zh' ? intlZh : intlEn;
-  const tronWeb = tronweb || (window as any).tronWeb;
-  const res = await tronWeb.fullNode;
-  const { host } = res;
-  const trongridNode = host === 'https://api.trongrid.io';
   const Notify: any = styled.div`
     position: relative;
   `;
@@ -318,11 +305,7 @@ export const getDescription = async (
       >
         <a
           className="typo-text-link"
-          href={`${
-            trongridNode
-              ? 'https://tronscan.io/#'
-              : 'https://nile.tronscan.io/#'
-          }/transaction/${tx}`}
+          href={`${tronscanLink}/transaction/${tx}`}
           target="_blank"
           rel="noopener noreferrer"
         >

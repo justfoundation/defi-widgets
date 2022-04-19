@@ -1,46 +1,42 @@
 'use strict';
 
-interface Error {
-  name: string;
-  message: string;
-  stack?: string;
+interface ResultType {
+  msg: string;
+  success: boolean;
 }
 
 export class Connector {
   [x: string]: any;
   public defaultAccount: any;
 
-  private accountsChangedListener = () => {
-    window.location.reload();
+  private accountsChangedListener = (result: any) => {
+    return result;
   };
 
-  private setAccountListener = () => {
-    window.location.reload();
+  private setAccountListener = (result: any) => {
+    return result;
   };
 
-  private chainChangedListener = () => {
-    window.location.reload();
+  private chainChangedListener = (result: any) => {
+    return result;
   };
 
-  private disconnectListener = () => {
-    window.location.reload();
+  private disconnectListener = (result: any) => {
+    return result;
   };
 
-  private connectListener = () => {
-    window.location.reload();
+  private connectListener = (result: any) => {
+    return result;
   };
 
-  errorMessage = (error: Error) => {
+  private errorMessage = (msg: string) => {
+    const error: ResultType = { success: false, msg };
     return error;
   };
 
-  handleTronWallet = async (tron: any, login?: boolean) => {
+  handleTronWallet = async (tron: any) => {
     if (!tron) {
-      const error = this.errorMessage({
-        message: `error: Didn't get tronweb`,
-        name: 'error',
-      });
-      return error;
+      return this.errorMessage(`error: tronweb not provided`);
     }
     if (tron?.defaultAddress?.base58) {
       this.defaultAccount = tron.defaultAddress.base58;
@@ -52,23 +48,20 @@ export class Connector {
       // Access the decentralized web!
       const tronWeb = tronLink.tronWeb;
       return tronWeb;
-    } else if (login) {
+    } else {
       const res = await tronLink.request({ method: 'tron_requestAccounts' });
       if (res.code === 200) {
         const tronWeb = tronLink.tronWeb;
         return tronWeb;
       }
       if (res.code === 4001) {
-        const error = this.errorMessage({
-          message: `error: Current connection refused`,
-          name: 'error',
-        });
+        const error = this.errorMessage(`error: Current connection refused`);
         return error;
       }
     }
   };
 
-  initTronLinkWallet = async (login?: boolean) => {
+  activate = async () => {
     try {
       const self = this;
       const tronlinkPromise = new Promise(reslove => {
@@ -114,9 +107,8 @@ export class Connector {
       });
 
       const tron = Promise.race([tronlinkPromise, appPromise]).then(res => {
-        return self.handleTronWallet(res, login);
+        return self.handleTronWallet(res);
       });
-      console.log(tron, 'trontron');
 
       this.on('accountsChanged', this.accountsChangedListener);
       this.on('setAccount', this.setAccountListener);
@@ -125,7 +117,7 @@ export class Connector {
       this.on('connectWeb', this.connectListener);
       return tron;
     } catch (e) {
-      return `error: ${e}`;
+      return this.errorMessage(`error: ${e}`);
     }
   };
 
@@ -138,17 +130,17 @@ export class Connector {
             !(window as any).tronLink &&
             res.data.message.data.address !== this.defaultAccount
           ) {
-            cb & cb();
+            return cb & cb(res.data.message);
+          } else {
+            return false;
           }
         } else {
-          cb & cb();
+          return cb & cb(res.data.message);
         }
+      } else {
+        return false;
       }
     });
-  };
-
-  activate = async () => {
-    return await this.initTronLinkWallet(true);
   };
 }
 
