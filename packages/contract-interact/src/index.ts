@@ -1,6 +1,17 @@
 'use strict';
+
+interface ResultType {
+  msg: string;
+  success: boolean;
+}
+
 export class Contract {
-  public feeLimitCommon: number = 400000000;
+  public feeLimitCommon: number = 150000000;
+
+  private errorMessage = (msg: string) => {
+    const error: ResultType = { success: false, msg };
+    return error;
+  };
 
   trigger = async (
     address: any,
@@ -26,7 +37,7 @@ export class Contract {
       }
       return transaction;
     } catch (error) {
-      console.log(error);
+      return this.errorMessage(`error: ${error}`);
     }
   };
 
@@ -37,7 +48,7 @@ export class Contract {
       const signedTransaction = await tronWeb.trx.sign(transaction);
       return signedTransaction;
     } catch (error) {
-      console.log(error, 'signerr');
+      return this.errorMessage(`error: ${error}`);
     }
   };
 
@@ -48,7 +59,7 @@ export class Contract {
       const result = await tronWeb.trx.sendRawTransaction(signedTransaction);
       return result;
     } catch (error) {
-      console.log(error);
+      return this.errorMessage(`error: ${error}`);
     }
   };
 
@@ -79,8 +90,7 @@ export class Contract {
 
       return result;
     } catch (error) {
-      console.log(error);
-      return {};
+      return this.errorMessage(`error: ${error}`);
     }
   };
 
@@ -102,8 +112,7 @@ export class Contract {
       );
       return result && result.result ? result.constant_result : [];
     } catch (error) {
-      console.log(error);
-      return [];
+      return this.errorMessage(`error: ${error}`);
     }
   };
 
@@ -126,7 +135,7 @@ export class Contract {
       if (result?.result) callbacks && callbacks();
       return result;
     } catch (error) {
-      console.log(error);
+      return this.errorMessage(`error: ${error}`);
     }
   };
 
@@ -154,7 +163,7 @@ export class Contract {
       if (result?.result) callbacks && callbacks();
       return result;
     } catch (error) {
-      console.log(error);
+      return this.errorMessage(`error: ${error}`);
     }
   };
 
@@ -182,7 +191,7 @@ export class Contract {
       if (result?.result) callbacks && callbacks();
       return result;
     } catch (error) {
-      console.log(error);
+      return this.errorMessage(`error: ${error}`);
     }
   };
 }

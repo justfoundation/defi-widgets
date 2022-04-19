@@ -14,11 +14,11 @@ function App() {
   const trxPrecision = 1e6;
 
   useEffect(() => {
-    initTronLinkWallet();
+    activate();
   }, [])
 
-  const initTronLinkWallet = async () => {
-    const tronWeb = await TronWebConnector.initTronLinkWallet();
+  const activate = async () => {
+    const tronWeb = await TronWebConnector.activate();
 
     if (tronWeb?.defaultAddress) {
       setDefaultAccount(tronWeb.defaultAddress.base58);

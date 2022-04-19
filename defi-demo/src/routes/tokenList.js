@@ -1,9 +1,11 @@
+import React from 'react';
 import '../App.scss';
 import { TokenListProvider } from '@widgets/swap-token-list';
 
 function App() {
   const addDefault = async () => {
     const res = await TokenListProvider.addDefaultTokenList();
+    console.log(res);
     if (res.success) {
       console.log('add default tokenlist success');
     } else {
@@ -35,7 +37,7 @@ function App() {
     const testUri = `https://raw.githubusercontent.com/BlackChar92/tokenlist/main/testlist.json`;
     const res = await TokenListProvider.getTokenListFromUri(testUri);
     if (res.success) {
-      console.log('get specified tokenlist from uri success: ', res.listData);
+      console.log('get specified tokenlist from uri success: ', res.data);
     } else {
       console.log('error message: ', res.msg);
     }
@@ -44,7 +46,7 @@ function App() {
   const getFromLocal = async () => {
     const res = await TokenListProvider.getTokenListFromLocal();
     if (res.success) {
-      console.log('get all tokenlists from local success: ', res.listsData);
+      console.log('get all tokenlists from local success: ', res.data);
     } else {
       console.log('error message: ', res.msg);
     }
@@ -54,7 +56,7 @@ function App() {
     const testUri = `https://raw.githubusercontent.com/BlackChar92/tokenlist/main/testlist.json`;
     const res = await TokenListProvider.updateTokenList(testUri);
     if (res.success) {
-      console.log('update specified tokenlist from uri success: ', res.listsData);
+      console.log('update specified tokenlist from uri success: ', res.data);
     } else {
       console.log('error message: ', res.msg);
     }
