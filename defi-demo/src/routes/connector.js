@@ -1,16 +1,18 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../App.scss';
 import BigNumber from 'bignumber.js';
 import { TronWebConnector } from '@widgets/tronweb-connector';
 
 function App() {
-  const [defaultAccount, setDefaultAccount] = useState(null);
+  const [defaultAccount, setDefaultAccount] = useState('');
   const [defaultAccountBalance, setDefaultAccountBalance] = useState('--');
 
   const trxPrecision = 1e6;
 
   useEffect(() => {
-    activate();
+    if (window.tronWeb?.defaultAccount) {
+      setDefaultAccount(window.tronWeb.defaultAddress.base58);
+    }
   }, [])
 
   const activate = async () => {
@@ -39,10 +41,10 @@ function App() {
           <>
             <div><span style={{ fontSize: '18px' }}>Current account: </span>{defaultAccount}</div>
             <div style={{ marginTop: '10px' }}><span style={{ fontSize: '18px' }}>Current account balance: </span>{defaultAccountBalance.toString()} TRX</div>
-            <button onClick={() => addListener()} style={{ marginTop: '10px' }}>On accountsChanged</button>
+            <div className='item' onClick={() => addListener()} style={{ marginTop: '10px' }}>On accountsChanged</div>
           </>
           :
-          <button onClick={() => activate()}>Connect Wallet</button>
+          <div className='item' onClick={() => activate()}>Connect Wallet</div>
         }
       </header>
     </div>
