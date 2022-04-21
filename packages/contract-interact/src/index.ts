@@ -13,15 +13,21 @@ export class Contract {
     return error;
   };
 
+  private getTronWeb = (userTronweb = {}) => {
+    return Object.keys(userTronweb).length > 0 ? userTronweb : (window as any).tronWeb;
+  }
+
   trigger = async (
     address: any,
     functionSelector: any,
-    options = {},
-    parameters = [],
-    tronweb: any
+    {
+      options = {},
+      parameters = [],
+      tronweb = {}
+    } = {}
   ) => {
     try {
-      const tronWeb = tronweb || (window as any).tronWeb;
+      const tronWeb = this.getTronWeb(tronweb);
       if (!tronWeb.defaultAddress) return;
       const transaction = await tronWeb.transactionBuilder.triggerSmartContract(
         address,
@@ -41,9 +47,9 @@ export class Contract {
     }
   };
 
-  sign = async (transaction: any, tronweb: any) => {
+  sign = async (transaction: any, { tronweb = {} } = {}) => {
     try {
-      const tronWeb = tronweb || (window as any).tronWeb;
+      const tronWeb = this.getTronWeb(tronweb);
       if (!tronWeb.defaultAddress) return;
       const signedTransaction = await tronWeb.trx.sign(transaction);
       return signedTransaction;
@@ -52,9 +58,9 @@ export class Contract {
     }
   };
 
-  broadCast = async (signedTransaction: any, tronweb: any) => {
+  broadCast = async (signedTransaction: any, { tronweb = {} } = {}) => {
     try {
-      const tronWeb = tronweb || (window as any).tronWeb;
+      const tronWeb = this.getTronWeb(tronweb);
       if (!tronWeb.defaultAddress) return;
       const result = await tronWeb.trx.sendRawTransaction(signedTransaction);
       return result;
@@ -66,25 +72,29 @@ export class Contract {
   send = async (
     address: any,
     functionSelector: any,
-    parameters = [],
-    options = {},
-    callbacks: () => any = () => {},
-    tronWeb: any
+    {
+      parameters = [],
+      options = {},
+      callbacks = () => {},
+      tronweb = {}
+    } = {}
   ) => {
     try {
       const transaction = await this.trigger(
         address,
         functionSelector,
-        options,
-        parameters,
-        tronWeb
+        {
+          options,
+          parameters,
+          tronweb
+        }
       );
 
       const signedTransaction = await this.sign(
         transaction?.transaction,
-        tronWeb
+        { tronweb }
       );
-      const result = await this.broadCast(signedTransaction, tronWeb);
+      const result = await this.broadCast(signedTransaction, tronweb);
 
       if (result?.result) callbacks && callbacks();
 
@@ -97,12 +107,14 @@ export class Contract {
   call = async (
     address: any,
     functionSelector: any,
-    parameters = [],
-    options = {},
-    tronweb: any
+    {
+      parameters = [],
+      options = {},
+      tronweb = {}
+    } = {}
   ) => {
     try {
-      const tronWeb = tronweb || (window as any).tronWeb;
+      const tronWeb = this.getTronWeb(tronweb);
       if (!tronWeb.defaultAddress) return;
       const result = await tronWeb.transactionBuilder.triggerSmartContract(
         address,
@@ -119,11 +131,13 @@ export class Contract {
   deploy = async (
     options: any,
     address: any,
-    callbacks: () => any,
-    tronweb: any
+    {
+      callbacks = () => {},
+      tronweb = {}
+    } = {}
   ) => {
     try {
-      const tronWeb = tronweb || (window as any).tronWeb;
+      const tronWeb = this.getTronWeb(tronweb);
       if (!tronWeb.defaultAddress) return;
       const transaction = await tronWeb.transactionBuilder.createSmartContract(
         options,
@@ -140,15 +154,17 @@ export class Contract {
   };
 
   sendTrx = async (
-    toAddress: any,
-    amount: any,
-    fromAddress: any,
+    toAddress: string,
+    amount: string | number,
+    fromAddress: string,
     options: any,
-    callbacks: any,
-    tronweb: any
+    {
+      callbacks = () => {},
+      tronweb = {}
+    } = {}
   ) => {
     try {
-      const tronWeb = tronweb || (window as any).tronWeb;
+      const tronWeb = this.getTronWeb(tronweb);
       if (!tronWeb.defaultAddress) return;
       const tradeObj = await tronWeb.transactionBuilder.sendTrx(
         toAddress,
@@ -156,7 +172,6 @@ export class Contract {
         fromAddress,
         options
       );
-
       const signedTransaction = await this.sign(tradeObj, tronWeb);
       const result = await this.broadCast(signedTransaction, tronWeb);
 
@@ -168,24 +183,26 @@ export class Contract {
   };
 
   sendToken = async (
-    address: any,
-    amount: any,
-    tokenID: any,
-    privateKey: string = '',
-    callbacks: any,
-    tronweb: any
+    address: string,
+    amount: string | number,
+    tokenID: string | number,
+    privateKey: string,
+    {
+      callbacks = () => {},
+      tronweb = {}
+    } = {}
   ) => {
     try {
-      const tronWeb = tronweb || (window as any).tronWeb;
+      const tronWeb = this.getTronWeb(tronweb);
       if (!tronWeb.defaultAddress) return;
       const tradeObj = await tronWeb.trx.sendToken(
         address,
         amount,
         tokenID,
-        privateKey && privateKey
+        privateKey,
       );
 
-      const signedTransaction = await this.sign(tradeObj, tronWeb);
+      const signedTransaction = await this.sign(tradeObj?.transaction ? tradeObj.transaction : tradeObj, tronWeb);
       const result = await this.broadCast(signedTransaction, tronWeb);
 
       if (result?.result) callbacks && callbacks();
