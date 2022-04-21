@@ -1,7 +1,10 @@
+@import '~antd/dist/antd.css';
+
 * {
     margin: 0;
     padding: 0;
 }
+
 .App {
     text-align: center;
     background-color: #282c34;
@@ -22,9 +25,11 @@
         padding: 40px 0;
         justify-content: center;
         border-right: 1px dashed rgb(255 255 255 / 70%);
+        font-size: calc(10px + 1vmin);
 
         h3 {
             margin-bottom: 20px;
+            color: #fff;
         }
 
         a {
@@ -46,6 +51,7 @@
             div {
                 margin-bottom: 15px;
             }
+
             span {
                 font-size: 18px;
             }
@@ -64,9 +70,9 @@
                 border: 1px solid rgb(255 255 255 / 30%);
                 margin: 15px 10px 0;
             }
-        } 
-        
-        &.w750 .items{
+        }
+
+        &.w750 .items {
             width: 750px;
         }
     }
@@ -81,6 +87,14 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+#root .ant-spin {
+    margin-top: 20px;
+
+    .ant-spin-dot-item {
+        background-color: #fff;
+    }
 }
 
 .wg-trans-notify,
@@ -100,6 +114,7 @@
     display: flex;
     flex-direction: column-reverse;
     font-family: 'Lato', 'PingFang', sans-serif;
+
     a {
         color: #5916e1;
         font-size: 14px;
@@ -109,6 +124,7 @@
 .trans-confirmed {
     font-weight: 500;
 }
+
 .wg-trans-notify {
     .wg-notify-ques {
         display: inline-block;
