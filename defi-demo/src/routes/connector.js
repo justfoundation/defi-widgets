@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import '../App.scss';
 import BigNumber from 'bignumber.js';
 import { TronWebConnector } from '@widgets/tronweb-connector';
+import Menu from '../components/menu';
 
 function App() {
   const [defaultAccount, setDefaultAccount] = useState('');
   const [defaultAccountBalance, setDefaultAccountBalance] = useState('--');
-
+  const [accountsChangedMsg, setAccountsChangedMsg] = useState('');
+  
   const trxPrecision = 1e6;
 
   useEffect(() => {
     if (window.tronWeb?.defaultAddress) {
-      initUserInfo();
+      initUserInfo(window.tronWeb.defaultAddress.base58);
     }
+    setAccountsChangedMsg('');
   }, []);
 
   const initUserInfo = async (userAddress) => {
@@ -26,30 +28,40 @@ function App() {
     const tronWeb = await TronWebConnector.activate();
 
     if (tronWeb?.defaultAddress?.base58) {
-      initUserInfo(tronWeb.defaultAddress?.base58);
+      initUserInfo(tronWeb.defaultAddress.base58);
     }
   };
 
   const addListener = () => {
     TronWebConnector.on('accountsChanged', res => {
       if (res.action === 'accountsChanged')
-      console.log('Current account address is: ', res.data.address);
+      setDefaultAccount(res.data.address);
+      setAccountsChangedMsg(`Current account address is: ${res.data.address}`);
     })
   };
 
   return (
     <div className="App">
-      <header className="App-header">
+      <Menu />
+      <section className="content">
         {defaultAccount ?
           <>
-            <div><span style={{ fontSize: '18px' }}>Current account: </span>{defaultAccount}</div>
-            <div style={{ marginTop: '10px' }}><span style={{ fontSize: '18px' }}>Current account balance: </span>{defaultAccountBalance.toString()} TRX</div>
-            <div className='item' onClick={() => addListener()} style={{ marginTop: '10px' }}>On accountsChanged</div>
+            <div className='info'>
+              <div><span>Current account: </span>{defaultAccount}</div>
+              <div><span>Current account balance: </span>{defaultAccountBalance.toString()} TRX</div>
+            </div>
+            
+            <div className='items'>
+              <div className='item' onClick={() => addListener()} style={{ marginTop: '10px' }}>On accountsChanged</div>
+            </div>
           </>
           :
-          <div className='item' onClick={() => activate()}>Connect Wallet</div>
+          <div className='items'>
+            <div className='item' onClick={() => activate()}>Connect Wallet</div>
+          </div>
         }
-      </header>
+        {accountsChangedMsg && <div className='msg'>Result message: {accountsChangedMsg}</div>}
+      </section>
     </div>
   );
 }
