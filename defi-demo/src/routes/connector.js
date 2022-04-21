@@ -60,7 +60,7 @@ function App() {
             <div className='item' onClick={() => activate()}>Connect Wallet</div>
           </div>
         }
-        {accountsChangedMsg && <div className='msg'>Result message: {accountsChangedMsg}</div>}
+        {accountsChangedMsg && <div className='msg' title={accountsChangedMsg}>Result message: {accountsChangedMsg}</div>}
       </section>
     </div>
   );

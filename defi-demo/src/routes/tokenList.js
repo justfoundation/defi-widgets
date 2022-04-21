@@ -41,7 +41,7 @@ function App() {
     const testUri = `https://raw.githubusercontent.com/BlackChar92/tokenlist/main/testlist.json`;
     const res = await TokenListProvider.getTokenListFromUri(testUri);
     if (res.success) {
-      setAccountsChangedMsg(`Get specified tokenlist from uri success: ${res.data}`);
+      setAccountsChangedMsg(`Get specified tokenlist from uri success: ${JSON.stringify(res.data)}`);
     } else {
       setAccountsChangedMsg(res.msg);
     }
@@ -50,7 +50,7 @@ function App() {
   const getFromLocal = async () => {
     const res = await TokenListProvider.getTokenListFromLocal();
     if (res.success) {
-      setAccountsChangedMsg(`Get all tokenlists from local success: ${res.data}`);
+      setAccountsChangedMsg(`Get all tokenlists from local success: ${JSON.stringify(res.data)}`);
     } else {
       setAccountsChangedMsg(res.msg);
     }
@@ -60,7 +60,7 @@ function App() {
     const testUri = `https://raw.githubusercontent.com/BlackChar92/tokenlist/main/testlist.json`;
     const res = await TokenListProvider.updateTokenList(testUri);
     if (res.success) {
-      setAccountsChangedMsg(`Update specified tokenlist from uri success: ${res.data}`);
+      setAccountsChangedMsg(`Update specified tokenlist from uri success: ${JSON.stringify(res.data)}`);
     } else {
       setAccountsChangedMsg(res.msg);
     }
@@ -69,7 +69,7 @@ function App() {
   const getInfo = async () => {
     const res = await TokenListProvider.getUpdateInfo();
     if (res.success) {
-      setAccountsChangedMsg(`Get all tokenlist update information success: ${res.updateInfo}`);
+      setAccountsChangedMsg(`Get all tokenlist update information success: ${JSON.stringify(res.updateInfo)}`);
     } else {
       setAccountsChangedMsg(res.msg);
     }
@@ -96,7 +96,7 @@ function App() {
         <div className='items'>
           <div className='item' onClick={() => getInfo()}>get all tokenlist update information</div>
         </div>
-        {accountsChangedMsg && <div className='msg'>Result message: {accountsChangedMsg}</div>}
+        {accountsChangedMsg && <div className='msg' title={accountsChangedMsg}>Result message: {accountsChangedMsg}</div>}
       </section>
     </div>
   );
