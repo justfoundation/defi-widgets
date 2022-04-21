@@ -12,19 +12,19 @@ function App() {
   const trxPrecision = 1e6;
 
   useEffect(() => {
-    activate();
+    // activate();
   }, [])
 
   const activate = async () => {
-    const tronWeb = await TronWebConnector.activate();
+    // const tronWeb = await TronWebConnector.activate();
 
-    if (tronWeb?.defaultAddress) {
-      setDefaultAccount(tronWeb.defaultAddress.base58);
+    // if (tronWeb?.defaultAddress) {
+    //   setDefaultAccount(tronWeb.defaultAddress.base58);
 
-      const accountInfo = await tronWeb.trx.getAccount(tronWeb.defaultAddress.base58);
-      const accountBalance = new BigNumber(accountInfo.balance).div(trxPrecision);
-      setDefaultAccountBalance(accountBalance);
-    }
+    //   const accountInfo = await tronWeb.trx.getAccount(tronWeb.defaultAddress.base58);
+    //   const accountBalance = new BigNumber(accountInfo.balance).div(trxPrecision);
+    //   setDefaultAccountBalance(accountBalance);
+    // }
   }
 
   const login = () => {

@@ -10,29 +10,32 @@ function App() {
   const trxPrecision = 1e6;
 
   useEffect(() => {
-    if (window.tronWeb?.defaultAccount) {
-      setDefaultAccount(window.tronWeb.defaultAddress.base58);
+    if (window.tronWeb?.defaultAddress) {
+      initUserInfo();
     }
-  }, [])
+  }, []);
+
+  const initUserInfo = async (userAddress) => {
+    setDefaultAccount(userAddress);
+    const accountInfo = await window.tronWeb.trx.getAccount(userAddress);
+    const accountBalance = new BigNumber(accountInfo.balance).div(trxPrecision);
+    setDefaultAccountBalance(accountBalance);
+  };
 
   const activate = async () => {
     const tronWeb = await TronWebConnector.activate();
 
-    if (tronWeb?.defaultAddress) {
-      setDefaultAccount(tronWeb.defaultAddress.base58);
-
-      const accountInfo = await tronWeb.trx.getAccount(tronWeb.defaultAddress.base58);
-      const accountBalance = new BigNumber(accountInfo.balance).div(trxPrecision);
-      setDefaultAccountBalance(accountBalance);
+    if (tronWeb?.defaultAddress?.base58) {
+      initUserInfo(tronWeb.defaultAddress?.base58);
     }
-  }
+  };
 
   const addListener = () => {
     TronWebConnector.on('accountsChanged', res => {
       if (res.action === 'accountsChanged')
       console.log('Current account address is: ', res.data.address);
     })
-  }
+  };
 
   return (
     <div className="App">
