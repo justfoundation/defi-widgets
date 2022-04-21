@@ -9,6 +9,7 @@ function App() {
   const [defaultAccountBalance, setDefaultAccountBalance] = useState('--');
   const [accountsChangedMsg, setAccountsChangedMsg] = useState('');
   const [loading, setLoading] = useState(false);
+  const [added, setAdded] = useState(false);
 
   const trxPrecision = 1e6;
 
@@ -17,6 +18,8 @@ function App() {
       initUserInfo(window.tronWeb.defaultAddress.base58);
     }
     setAccountsChangedMsg('');
+    setLoading(false);
+    setAdded(false);
   }, []);
 
   const initUserInfo = async (userAddress) => {
@@ -41,10 +44,37 @@ function App() {
   };
 
   const addListener = () => {
+    setAdded(true);
     TronWebConnector.on('accountsChanged', res => {
-      if (res.action === 'accountsChanged')
+      if (res.action === 'accountsChanged') {
         setDefaultAccount(res.data.address);
-      setAccountsChangedMsg(`Current account address is: ${res.data.address}`);
+        setAccountsChangedMsg(`Current account address is: ${res.data.address}`);
+      }
+    })
+
+    TronWebConnector.on('setAccount', res => {
+      if (res.action === 'setAccount') {
+        console.log(res);
+        // setAccountsChangedMsg(`Current account fullNode is: ${res.data.node.fullNode}`);
+      }
+    })
+
+    TronWebConnector.on('setNode', res => {
+      if (res.action === 'setNode') {
+        setAccountsChangedMsg(`Current account fullNode is: ${res.data.node.fullNode}`);
+      }
+    })
+
+    TronWebConnector.on('disconnectWeb', res => {
+      if (res.action === 'disconnectWeb') {
+        setAccountsChangedMsg(`disconnect website name: ${res.data.websiteName}`);
+      }
+    })
+
+    TronWebConnector.on('connectWeb', res => {
+      if (res.action === 'connectWeb') {
+        setAccountsChangedMsg(`connect website name: ${res.data.websiteName}`);
+      }
     })
   };
 
@@ -60,8 +90,10 @@ function App() {
             </div>
 
             <div className='items'>
-              <div className='item' onClick={() => addListener()} style={{ marginTop: '10px' }}>On accountsChanged</div>
+              <div className='item' onClick={() => addListener()} >addListeners</div>
+              {added && <div className="desc">{'added!'}</div>}
             </div>
+            <div className='desc'>Such as accountsChanged, setAccount, setNode, disconnectWeb, connectWeb</div>
           </>
           :
           <div className='items'>

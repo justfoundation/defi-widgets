@@ -61,15 +61,24 @@
             display: flex;
             max-width: 900px;
             justify-content: flex-start;
+            align-items: center;
 
             .item {
-                margin-top: 15px;
                 cursor: pointer;
                 padding: 8px 20px;
                 border-radius: 5px;
                 border: 1px solid rgb(255 255 255 / 30%);
-                margin: 15px 10px 0;
+                margin: 8px 10px;
+
+                &:hover {
+                    border: 1px solid rgb(255 255 255 / 70%);
+                }
             }
+        }
+
+        .desc {
+            font-size: 14px;
+            color: rgb(255 255 255 / 70%);
         }
 
         &.w750 .items {
