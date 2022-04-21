@@ -82,6 +82,8 @@ function App() {
     const res = await deploy(deployOptions);
     if (res.result) {
       setAccountsChangedMsg('Deploy success');
+    } else {
+      setAccountsChangedMsg(res.msg);
     }
   }
 
@@ -94,6 +96,8 @@ function App() {
 
     if (res.result) {
       setAccountsChangedMsg('Trigger success');
+    } else {
+      setAccountsChangedMsg(res.msg);
     }
   }
 
@@ -105,6 +109,8 @@ function App() {
 
     if (res?.length) {
       setAccountsChangedMsg('Call success');
+    } else {
+      setAccountsChangedMsg(res.msg);
     }
   }
 
@@ -116,6 +122,8 @@ function App() {
 
     if (res?.result) {
       setAccountsChangedMsg('Send TRX success');
+    } else {
+      setAccountsChangedMsg(res.msg);
     }
   }
 
@@ -128,6 +136,8 @@ function App() {
 
     if (res?.result) {
       setAccountsChangedMsg('Send 10 Token success');
+    } else {
+      setAccountsChangedMsg(res.msg);
     }
   }
 
