@@ -14,17 +14,15 @@ export class Contract {
   };
 
   private getTronWeb = (userTronweb = {}) => {
-    return Object.keys(userTronweb).length > 0 ? userTronweb : (window as any).tronWeb;
-  }
+    return Object.keys(userTronweb).length > 0
+      ? userTronweb
+      : (window as any).tronWeb;
+  };
 
   trigger = async (
     address: any,
     functionSelector: any,
-    {
-      options = {},
-      parameters = [],
-      tronweb = {}
-    } = {}
+    { options = {}, parameters = [], tronweb = {} } = {}
   ) => {
     try {
       const tronWeb = this.getTronWeb(tronweb);
@@ -72,28 +70,18 @@ export class Contract {
   send = async (
     address: any,
     functionSelector: any,
-    {
-      parameters = [],
-      options = {},
-      callbacks = () => {},
-      tronweb = {}
-    } = {}
+    { parameters = [], options = {}, callbacks = () => {}, tronweb = {} } = {}
   ) => {
     try {
-      const transaction = await this.trigger(
-        address,
-        functionSelector,
-        {
-          options,
-          parameters,
-          tronweb
-        }
-      );
+      const transaction = await this.trigger(address, functionSelector, {
+        options,
+        parameters,
+        tronweb,
+      });
 
-      const signedTransaction = await this.sign(
-        transaction?.transaction,
-        { tronweb }
-      );
+      const signedTransaction = await this.sign(transaction?.transaction, {
+        tronweb,
+      });
       const result = await this.broadCast(signedTransaction, tronweb);
 
       if (result?.result) callbacks && callbacks();
@@ -105,13 +93,9 @@ export class Contract {
   };
 
   call = async (
-    address: any,
+    address: string,
     functionSelector: any,
-    {
-      parameters = [],
-      options = {},
-      tronweb = {}
-    } = {}
+    { parameters = [], options = {}, tronweb = {} } = {}
   ) => {
     try {
       const tronWeb = this.getTronWeb(tronweb);
@@ -130,11 +114,8 @@ export class Contract {
 
   deploy = async (
     options: any,
-    address: any,
-    {
-      callbacks = () => {},
-      tronweb = {}
-    } = {}
+    address: string,
+    { callbacks = () => {}, tronweb = {} } = {}
   ) => {
     try {
       const tronWeb = this.getTronWeb(tronweb);
@@ -158,10 +139,7 @@ export class Contract {
     amount: string | number,
     fromAddress: string,
     options: any,
-    {
-      callbacks = () => {},
-      tronweb = {}
-    } = {}
+    { callbacks = () => {}, tronweb = {} } = {}
   ) => {
     try {
       const tronWeb = this.getTronWeb(tronweb);
@@ -187,22 +165,22 @@ export class Contract {
     amount: string | number,
     tokenID: string | number,
     privateKey: string,
-    {
-      callbacks = () => {},
-      tronweb = {}
-    } = {}
+    { callbacks = () => {}, tronweb = {} } = {}
   ) => {
     try {
       const tronWeb = this.getTronWeb(tronweb);
       if (!tronWeb.defaultAddress) return;
-      const tradeObj = await tronWeb.trx.sendToken(
+      const tradeObj = await tronWeb.transactionBuilder.sendToken(
         address,
         amount,
         tokenID,
-        privateKey,
+        privateKey
       );
 
-      const signedTransaction = await this.sign(tradeObj?.transaction ? tradeObj.transaction : tradeObj, tronWeb);
+      const signedTransaction = await this.sign(
+        tradeObj?.transaction ? tradeObj.transaction : tradeObj,
+        tronWeb
+      );
       const result = await this.broadCast(signedTransaction, tronWeb);
 
       if (result?.result) callbacks && callbacks();

@@ -12,6 +12,7 @@ function App() {
   const [accountsChangedMsg, setAccountsChangedMsg] = useState('');
 
   const trxPrecision = 1e6;
+  const DATA_LEN = 64;
 
   useEffect(() => {
     if (window.tronWeb?.defaultAddress) {
@@ -81,7 +82,7 @@ function App() {
   const deployContract = async () => {
     const res = await deploy(deployOptions);
     if (res.result) {
-      setAccountsChangedMsg('Deploy success');
+      setAccountsChangedMsg(`Deploy success, the consaction ID is ${res.txid}`);
     } else {
       setAccountsChangedMsg(res.msg);
     }
@@ -91,11 +92,11 @@ function App() {
     const res = await send(
       'TLmDopsmzmGDpQFyzRp1EDQJ588W7URXdH',
       "postMessage(string)",
-      [{ type: 'string', value: 'Hello' }]
+      { parameters: [{ type: 'string', value: 'Hello' }] }
     );
 
     if (res.result) {
-      setAccountsChangedMsg('Trigger success');
+      setAccountsChangedMsg(`Trigger success, the consaction ID is ${res.txid}`);
     } else {
       setAccountsChangedMsg(res.msg);
     }
@@ -107,6 +108,25 @@ function App() {
       "getMessage()"
     );
 
+    function hex2str(hex) {
+      var trimedStr = hex.trim();
+      var rawStr = trimedStr.substr(0, 2).toLowerCase() === "0x" ? trimedStr.substr(2) : trimedStr;
+      var len = rawStr.length;
+      if (len % 2 !== 0) {
+        alert("Illegal Format ASCII Code!");
+        return "";
+      }
+      var curCharCode;
+      var resultStr = [];
+      for (var i = 0; i < len; i = i + 2) {
+        curCharCode = parseInt(rawStr.substr(i, 2), 16);
+        resultStr.push(String.fromCharCode(curCharCode));
+      }
+      return resultStr.join("");
+    }
+
+    const aaa = BigNumber(res[0].substr(0, DATA_LEN), 16);
+    console.log(res, aaa, hex2str(res[0]));
     if (res?.length) {
       setAccountsChangedMsg('Call success');
     } else {
@@ -121,7 +141,7 @@ function App() {
     );
 
     if (res?.result) {
-      setAccountsChangedMsg('Send TRX success');
+      setAccountsChangedMsg('Send 1 TRX to TBHHa5Z6WQ1cRcgUhdvqdW4f728f2fiJmF success');
     } else {
       setAccountsChangedMsg(res.msg);
     }
@@ -135,7 +155,7 @@ function App() {
     );
 
     if (res?.result) {
-      setAccountsChangedMsg('Send 10 Token success');
+      setAccountsChangedMsg('Send 0.01 TRC10 Token to TBHHa5Z6WQ1cRcgUhdvqdW4f728f2fiJmF success');
     } else {
       setAccountsChangedMsg(res.msg);
     }
@@ -149,7 +169,7 @@ function App() {
           <>
             <div className='info'>
               <div><span>Current account: </span>{defaultAccount}</div>
-              <div><span>Current account balance: </span>{defaultAccountBalance.toString()} TRX</div>              
+              <div><span>Current account balance: </span>{defaultAccountBalance.toString()} TRX</div>
             </div>
 
             <div className='items'>
