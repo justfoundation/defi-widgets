@@ -94,19 +94,21 @@ export class Contract {
 
   call = async (
     address: string,
-    functionSelector: any,
-    { parameters = [], options = {}, tronweb = {} } = {}
+    _functionSelector: any,
+    { tronweb = {}, abi = [] } = {}
   ) => {
     try {
       const tronWeb = this.getTronWeb(tronweb);
       if (!tronWeb.defaultAddress) return;
-      const result = await tronWeb.transactionBuilder.triggerSmartContract(
-        address,
-        functionSelector,
-        { _isConstant: true, options },
-        parameters
-      );
-      return result && result.result ? result.constant_result : [];
+      let contractInstacne;
+      if (abi.length > 0) {
+        contractInstacne = await tronWeb.contract(abi, address);
+      } else {
+        contractInstacne = await tronWeb.contract().at(address);
+      }
+      const result = await contractInstacne[_functionSelector].call().call();
+
+      return { result };
     } catch (error) {
       return this.errorMessage(`error: ${error}`);
     }

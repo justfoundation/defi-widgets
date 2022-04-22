@@ -105,30 +105,12 @@ function App() {
   const callContract = async () => {
     const res = await call(
       'TLmDopsmzmGDpQFyzRp1EDQJ588W7URXdH',
-      "getMessage()"
+      "getMessage()",
+      { abi: funcABIV2.abi }
     );
 
-    function hex2str(hex) {
-      var trimedStr = hex.trim();
-      var rawStr = trimedStr.substr(0, 2).toLowerCase() === "0x" ? trimedStr.substr(2) : trimedStr;
-      var len = rawStr.length;
-      if (len % 2 !== 0) {
-        alert("Illegal Format ASCII Code!");
-        return "";
-      }
-      var curCharCode;
-      var resultStr = [];
-      for (var i = 0; i < len; i = i + 2) {
-        curCharCode = parseInt(rawStr.substr(i, 2), 16);
-        resultStr.push(String.fromCharCode(curCharCode));
-      }
-      return resultStr.join("");
-    }
-
-    const aaa = BigNumber(res[0].substr(0, DATA_LEN), 16);
-    console.log(res, aaa, hex2str(res[0]));
-    if (res?.length) {
-      setAccountsChangedMsg('Call success');
+    if (res.result) {
+      setAccountsChangedMsg(`Call success, the result is: ${res.result}`);
     } else {
       setAccountsChangedMsg(res.msg);
     }
