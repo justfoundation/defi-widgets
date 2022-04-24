@@ -7,6 +7,7 @@ import {
 } from '@ant-design/icons';
 import { renderToString } from 'react-dom/server';
 import styled, { keyframes } from 'styled-components';
+import styles from './assets/css/transaction.scss';
 
 interface CustomObjType {
   title?: string;
@@ -26,14 +27,6 @@ export const OpenTransModal = async (
   const { step, txId } = stepInfo;
 
   if (!step) return;
-
-  const TransMask: any = styled.div`
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    height: 100%;
-    background-color: #00000073;
-  `;
 
   const TransContent: any = styled.div`
     position: fixed;
@@ -113,8 +106,8 @@ export const OpenTransModal = async (
   const intl = customObj?.lang === 'zh' ? intlZh : intlEn;
 
   const modalContent = (
-    <div className="trans-modal-container">
-      <TransMask className="trans-modal-mask" />
+    <div className={styles.transModalContainer}>
+      <div className={styles.transModalMask} ></div>
       <TransContent className="trans-modal-content">
         <TransBody className="trans-modal-body">
           <TransTitle className="trans-modal-title">
