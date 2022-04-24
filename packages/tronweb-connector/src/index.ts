@@ -13,10 +13,6 @@ export class Connector {
     return result;
   };
 
-  private setAccountListener = (result: any) => {
-    return result;
-  };
-
   private chainChangedListener = (result: any) => {
     return result;
   };
@@ -111,8 +107,7 @@ export class Connector {
       });
 
       this.on('accountsChanged', this.accountsChangedListener);
-      this.on('setAccount', this.setAccountListener);
-      this.on('setNode', this.chainChangedListener);
+      this.on('chainChanged', this.chainChangedListener);
       this.on('disconnectWeb', this.disconnectListener);
       this.on('connectWeb', this.connectListener);
       return tron;
@@ -122,21 +117,11 @@ export class Connector {
   };
 
   on = (_action: string, cb: any) => {
+    let actionName = _action;
+    if (_action === 'chainChanged') actionName = 'setNode';
     window.addEventListener('message', res => {
-      if (res.data.message && res.data.message.action == _action) {
-        if (_action == 'setAccount') {
-          if (
-            (window as any).tronWeb &&
-            !(window as any).tronLink &&
-            res.data.message.data.address !== this.defaultAccount
-          ) {
-            return cb & cb(res.data.message);
-          } else {
-            return false;
-          }
-        } else {
-          return cb & cb(res.data.message);
-        }
+      if (res.data.message && res.data.message.action == actionName) {
+        return cb & cb({...res.data.message, action: _action});
       } else {
         return false;
       }
