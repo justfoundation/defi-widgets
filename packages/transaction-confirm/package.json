@@ -53,9 +53,13 @@
     "@types/react-dom": "^17.0.14",
     "babel-loader": "^8.2.4",
     "husky": "^7.0.4",
+    "less": "^4.1.2",
+    "postcss": "^8.4.12",
+    "postcss-modules": "^4.3.1",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-is": "^18.0.0",
+    "rollup-plugin-postcss": "^4.0.2",
     "size-limit": "^7.0.8",
     "tsdx": "^0.14.1",
     "tslib": "^2.3.1",
@@ -63,7 +67,9 @@
   },
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
+    "@rollup/plugin-image": "^2.1.1",
     "@types/styled-components": "^5.1.24",
+    "sass": "^1.50.1",
     "styled-components": "^5.3.5"
   }
 }
