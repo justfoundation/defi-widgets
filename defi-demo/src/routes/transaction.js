@@ -3,34 +3,43 @@ import '../App.scss';
 import BigNumber from 'bignumber.js';
 import { TronWebConnector } from '@widgets/tronweb-connector';
 import { ContractInteract } from '@widgets/contract-interact';
-import { OpenTransModal, Thing2 } from '@widgets/transaction-confirm';
-import { renderToString } from 'react-dom/server'
-const { sendTrx } = ContractInteract;
+import {
+  OpenTransModal,
+  setTransactionsData,
+  getTransactionInfo,
+  getDescription,
+  checkPendingTransactions,
+  logTransaction,
+  saveTransactions,
+  setVariablesInterval
+} from '@widgets/transaction-confirm';
+import Menu from '../components/menu';
+const { trigger, sign, broadCast, send, sendTrx } = ContractInteract;
 
 function App() {
-  const [defaultAccount, setDefaultAccount] = useState(null);
+  const [defaultAccount, setDefaultAccount] = useState('');
   const [defaultAccountBalance, setDefaultAccountBalance] = useState('--');
 
   const trxPrecision = 1e6;
 
   useEffect(() => {
-    activate();
+    if (window.tronWeb?.defaultAddress) {
+      initUserInfo(window.tronWeb.defaultAddress.base58);
+    }
   }, [])
 
+  const initUserInfo = async (userAddress) => {
+    setDefaultAccount(userAddress);
+    const accountInfo = await window.tronWeb.trx.getAccount(userAddress);
+    const accountBalance = new BigNumber(accountInfo.balance).div(trxPrecision);
+    setDefaultAccountBalance(accountBalance);
+  };
+
   const activate = async () => {
-    const tronWeb = await TronWebConnector.activate();
-
-    if (tronWeb?.defaultAddress) {
-      setDefaultAccount(tronWeb.defaultAddress.base58);
-
-      const accountInfo = await tronWeb.trx.getAccount(tronWeb.defaultAddress.base58);
-      const accountBalance = new BigNumber(accountInfo.balance).div(trxPrecision);
-      setDefaultAccountBalance(accountBalance);
+    const res = await TronWebConnector.activate();
+    if (res?.defaultAddress?.base58) {
+      initUserInfo(res.defaultAddress.base58);
     }
-  }
-
-  const login = () => {
-    TronWebConnector.activate();
   }
 
   const sendTrxFunc = async () => {
@@ -50,15 +59,24 @@ function App() {
 
   return (
     <div className="App">
+      <Menu />
+      <section className="content">
         {defaultAccount ?
-          <div className='logged'>
-            <div><span style={{ fontSize: '18px' }}>Current account: </span>{defaultAccount}</div>
-            <div style={{ marginTop: '10px' }}><span style={{ fontSize: '18px' }}>Current account balance: </span>{defaultAccountBalance.toString()} TRX</div>
-            <button onClick={() => sendTrxFunc()}>Send TRX</button>
-          </div>
+          <>
+            <div className='info'>
+              <div><span>Current account: </span>{defaultAccount}</div>
+              <div><span>Current account balance: </span>{defaultAccountBalance.toString()} TRX</div>
+            </div>
+            <div className='items'>
+              <div className='item' onClick={() => sendTrxFunc()} >Send TRX</div>
+            </div>
+          </>
           :
-          <button onClick={() => login()}>Connect Wallet</button>
+          <div className='items'>
+            <div className='item' onClick={() => activate()}>Connect Wallet</div>
+          </div>
         }
+      </section>
     </div>
   );
 }
