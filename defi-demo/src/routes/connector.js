@@ -52,15 +52,8 @@ function App() {
       }
     })
 
-    TronWebConnector.on('setAccount', res => {
-      if (res.action === 'setAccount') {
-        console.log(res);
-        // setAccountsChangedMsg(`Current account fullNode is: ${res.data.node.fullNode}`);
-      }
-    })
-
-    TronWebConnector.on('setNode', res => {
-      if (res.action === 'setNode') {
+    TronWebConnector.on('chainChanged', res => {
+      if (res.action === 'chainChanged') {
         setAccountsChangedMsg(`Current account fullNode is: ${res.data.node.fullNode}`);
       }
     })
