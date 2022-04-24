@@ -5,3 +5,93 @@
   height: 100%;
   background-color: #00000073;
 }
+
+.transContent {
+  position: fixed;
+  inset: 0;
+  overflow: auto;
+  outline: 0;
+  z-index: 1000;
+}
+
+.transBody {
+  padding: 24px;
+  font-size: 14px;
+  line-height: 1.5715;
+  word-wrap: break-word;
+  background-color: #fff;
+  width: 320px;
+  display: flex;
+  margin: auto;
+  flex-direction: column;
+  align-items: center;
+  transform: translateY(50%);
+  position: relative;
+  border-radius: 15px;
+  color: rgba(0, 0, 0, 0.85);
+  box-shadow: 0 20px 40px hsl(0deg 0% 58% / 6%);
+  font-size: 14px;
+}
+
+.transTitle {
+  font-size: 14px;
+}
+
+@keyframes BounceAnimation {
+  0% {
+    transform: rotate(0deg)
+  }
+  50% {
+    transform: rotate(180deg)
+  }
+  100% {
+    transform: rotate(360deg)
+  }
+}
+
+.loading {
+  margin: 15px 0;
+  animation: BounceAnimation 2s linear infinite;
+}
+
+.modalClose {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  right: 15px;
+  top: 15px;
+  cursor: pointer;
+}
+
+.notify {
+  position: relative;
+}
+
+.errTip {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: #000;
+  color: #fff;
+}
+
+.notification {
+  position: absolute;
+  z-index: 9;
+  right: 20px;
+  top: 20px;
+}
+
+.notifyClose {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  right: 15px;
+  top: 15px;
+  cursor: pointer;
+}
+
+.modalIcon {
+  margin: 10px 0;
+}

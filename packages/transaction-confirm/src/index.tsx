@@ -6,7 +6,6 @@ import {
   CloseOutlined,
 } from '@ant-design/icons';
 import { renderToString } from 'react-dom/server';
-import styled, { keyframes } from 'styled-components';
 import styles from './assets/css/transaction.scss';
 
 interface CustomObjType {
@@ -27,63 +26,6 @@ export const OpenTransModal = async (
   const { step, txId } = stepInfo;
 
   if (!step) return;
-
-  const TransContent: any = styled.div`
-    position: fixed;
-    inset: 0;
-    overflow: auto;
-    outline: 0;
-    z-index: 1000;
-  `;
-
-  const TransBody: any = styled.div`
-    padding: 24px;
-    font-size: 14px;
-    line-height: 1.5715;
-    word-wrap: break-word;
-    background-color: #fff;
-    width: 320px;
-    display: flex;
-    margin: auto;
-    flex-direction: column;
-    align-items: center;
-    transform: translateY(50%);
-    position: relative;
-    border-radius: 15px;
-    color: rgba(0, 0, 0, 0.85);
-    box-shadow: 0 20px 40px hsl(0deg 0% 58% / 6%);
-    font-size: 14px;
-  `;
-
-  const TransTitle: any = styled.div`
-    font-size: 14px;
-  `;
-
-  const BounceAnimation = keyframes`
-    0% {
-      transform: rotate(0deg)
-    }
-    50% {
-      transform: rotate(180deg)
-    }
-    100% {
-      transform: rotate(360deg)
-    }
-  `;
-
-  const Loading: any = styled.div`
-    margin: 15px 0;
-    animation: ${BounceAnimation} 2s linear infinite;
-  `;
-
-  const Close: any = styled.div`
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    right: 15px;
-    top: 15px;
-    cursor: pointer;
-  `;
 
   const intlZh = {
     transaction: '交易',
@@ -107,15 +49,15 @@ export const OpenTransModal = async (
 
   const modalContent = (
     <div className={styles.transModalContainer}>
-      <div className={styles.transModalMask} ></div>
-      <TransContent className="trans-modal-content">
-        <TransBody className="trans-modal-body">
-          <TransTitle className="trans-modal-title">
+      <div className={styles.transModalMask}></div>
+      <div className={styles.transContent}>
+        <div className={styles.transBody}>
+          <div className={styles.transTitle}>
             {customObj?.title ? customObj?.title : intl.transaction}
-          </TransTitle>
+          </div>
           {step == 1 ? (
             <React.Fragment>
-              <Loading className="trans-modal-icon">
+              <div className={styles.loading}>
                 <Loading3QuartersOutlined
                   style={{
                     fontSize: '60px',
@@ -123,7 +65,7 @@ export const OpenTransModal = async (
                     margin: '20px 0',
                   }}
                 />
-              </Loading>
+              </div>
               <div className="trans-modal-status trans-modal-wait-confirm">
                 {customObj.wait_confirm ? customObj.wait_confirm : intl.waiting}
               </div>
@@ -135,7 +77,7 @@ export const OpenTransModal = async (
             </React.Fragment>
           ) : step == 2 ? (
             <React.Fragment>
-              <div className="trans-modal-icon">
+              <div className={styles.modalIcon}>
                 <CheckCircleOutlined
                   style={{ fontSize: '80px', color: '#1bc378' }}
                 ></CheckCircleOutlined>
@@ -160,7 +102,7 @@ export const OpenTransModal = async (
             </React.Fragment>
           ) : step == 3 ? (
             <React.Fragment>
-              <div className="trans-modal-icon">
+              <div className={styles.modalIcon}>
                 <CloseCircleOutlined
                   style={{ fontSize: '80px', color: '#d84b79' }}
                 ></CloseCircleOutlined>
@@ -172,11 +114,11 @@ export const OpenTransModal = async (
           ) : (
             <></>
           )}
-          <Close className="trans-modal-close">
+          <div className={styles.modalClose}>
             <CloseOutlined />
-          </Close>
-        </TransBody>
-      </TransContent>
+          </div>
+        </div>
+      </div>
     </div>
   );
 
@@ -276,19 +218,9 @@ export const getDescription = async (
       'Failure may be caused by the following situations, please check if:<br />①your Energy or bandwidth is insufficient; please top up<br />②your slippage is too low; please reset<br />③your current network is congested; please try again later<br />④your system time is incorrect; please check and try again',
   };
   const intl = lang === 'zh' ? intlZh : intlEn;
-  const Notify: any = styled.div`
-    position: relative;
-  `;
-  const ErrTip: any = styled.div`
-    display: none;
-    position: absolute;
-    top: 0;
-    left: 0;
-    background: #000;
-    color: #fff;
-  `;
+
   const notifyDom = (
-    <Notify className={'wg-trans-notify'}>
+    <div className={styles.notify}>
       <span
         style={{
           display: 'flex',
@@ -308,17 +240,17 @@ export const getDescription = async (
       </span>
       {type === 3 ? (
         <div className={'flex between ai-center'}>
-          <ErrTip
-            className="wg-notify-errTip"
+          <div
+            className={styles.errTip}
             dangerouslySetInnerHTML={{ __html: intl.errTip }}
-          ></ErrTip>
+          ></div>
           <span className="wg-notify-ques">?</span>
           <span className={'trans-btn-tip ' + className}>{text}</span>
         </div>
       ) : (
         <span className={'trans-btn-tip ' + className}>{text}</span>
       )}
-    </Notify>
+    </div>
   );
   const ques: any = document.querySelector('.wg-notify-ques');
   const errTip: any = document.querySelector('.wg-notify-errTip');
@@ -399,22 +331,6 @@ export const logTransaction = async (
   if (status === 1) item.showPending = false;
   const { customObj } = item;
 
-  const Notification: any = styled.div`
-    position: absolute;
-    z-index: 9;
-    right: 20px;
-    top: 20px;
-  `;
-
-  const Close: any = styled.div`
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    right: 15px;
-    top: 15px;
-    cursor: pointer;
-  `;
-
   const intlZh = {
     pending: '待确认',
     confirmed: '已确认',
@@ -439,13 +355,13 @@ export const logTransaction = async (
       <div className="description">
         {await getDescription(status, item, description)}
       </div>
-      <Notification className="wg-notify-block">
+      <div className={styles.notification}>
         <div className="message">{customObj.title}</div>
         <div className="description">
           {await getDescription(status, item, description)}
         </div>
-        <Close className="trans-notify-close">{<CloseOutlined />} </Close>
-      </Notification>
+        <div className={styles.notifyClose}>{<CloseOutlined />} </div>
+      </div>
     </div>
   );
 
