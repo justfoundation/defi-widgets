@@ -6,6 +6,7 @@ import {
   CloseOutlined,
 } from '@ant-design/icons';
 import { renderToString } from 'react-dom/server';
+import classNames from 'classnames';
 import styles from './assets/css/transaction.scss';
 
 interface CustomObjType {
@@ -114,7 +115,7 @@ export const OpenTransModal = async (
           ) : (
             <></>
           )}
-          <div className={styles.modalClose}>
+          <div className={classNames(styles.modalClose, 'modal-close')}>
             <CloseOutlined />
           </div>
         </div>
@@ -133,7 +134,7 @@ export const OpenTransModal = async (
   }
   container.style.display = 'block';
 
-  let closeIcon: any = document.querySelector('.trans-modal-close');
+  let closeIcon: any = document.querySelector('.modal-close');
   closeIcon.onclick = () => {
     container.style.display = 'none';
   };
@@ -360,7 +361,7 @@ export const logTransaction = async (
         <div className="description">
           {await getDescription(status, item, description)}
         </div>
-        <div className={styles.notifyClose}>{<CloseOutlined />} </div>
+        <div className={classNames(styles.notifyClose, 'notify-close')}>{<CloseOutlined />} </div>
       </div>
     </div>
   );
@@ -378,7 +379,7 @@ export const logTransaction = async (
   }
   container.style.display = 'block';
 
-  let closeIcon: any = document.querySelector('.trans-notify-close');
+  let closeIcon: any = document.querySelector('.notify-close');
   closeIcon.onclick = () => {
     container.style.display = 'none';
   };
