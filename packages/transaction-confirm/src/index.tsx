@@ -15,6 +15,19 @@ interface CustomObjType {
   cancelled?: string;
 }
 
+const getTransactionInfo = (tx: string, tronweb = null) => {
+  const tronWeb = tronweb || (window as any).tronWeb;
+  return new Promise((resolve, reject) => {
+    tronWeb.trx.getConfirmedTransaction(tx, (e: any, r: unknown) => {
+      if (!e) {
+        resolve(r);
+      } else {
+        reject(e);
+      }
+    });
+  });
+};
+
 export const OpenTransModal = async (
   stepInfo = { step: 0, txId: '' },
   customObj: CustomObjType = {},
@@ -71,20 +84,7 @@ export const setTransactionsData = (
   }
 };
 
-export const getTransactionInfo = (tx: string, tronweb = null) => {
-  const tronWeb = tronweb || (window as any).tronWeb;
-  return new Promise((resolve, reject) => {
-    tronWeb.trx.getConfirmedTransaction(tx, (e: any, r: unknown) => {
-      if (!e) {
-        resolve(r);
-      } else {
-        reject(e);
-      }
-    });
-  });
-};
-
-export const getDescription = async (
+const getDescription = async (
   type: number,
   item: any,
   text: string,
