@@ -50,10 +50,10 @@ function App() {
     setLoading(false);
     if (res?.defaultAddress?.base58) {
       initUserInfo(res.defaultAddress.base58);
-    } else if (!res?.success && res?.msg) {
-      setAccountsChangedMsg(res.msg);
+    } else if (!res?.success && res?.errorCode && res?.msg) {
+      setAccountsChangedMsg(`${res.msg}(${res.errorCode})`);
     } else {
-      setAccountsChangedMsg(`Please install and log in to tronlink first`);
+      setAccountsChangedMsg(`Please install and log in to TronLink first`);
     }
   };
 
