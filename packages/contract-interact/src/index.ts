@@ -56,7 +56,7 @@ export class Contract {
     }
   };
 
-  broadCast = async (signedTransaction: any, { tronweb = {} } = {}) => {
+  broadcast = async (signedTransaction: any, { tronweb = {} } = {}) => {
     try {
       const tronWeb = this.getTronWeb(tronweb);
       if (!tronWeb.defaultAddress) return;
@@ -82,7 +82,7 @@ export class Contract {
       const signedTransaction = await this.sign(transaction?.transaction, {
         tronweb,
       });
-      const result = await this.broadCast(signedTransaction, tronweb);
+      const result = await this.broadcast(signedTransaction, tronweb);
 
       if (result?.result) callbacks && callbacks();
 
@@ -127,7 +127,7 @@ export class Contract {
         address
       );
       const signedTransaction = await this.sign(transaction, tronWeb);
-      const result = await this.broadCast(signedTransaction, tronWeb);
+      const result = await this.broadcast(signedTransaction, tronWeb);
 
       if (result?.result) callbacks && callbacks();
       return result;
@@ -153,7 +153,7 @@ export class Contract {
         options
       );
       const signedTransaction = await this.sign(tradeObj, tronWeb);
-      const result = await this.broadCast(signedTransaction, tronWeb);
+      const result = await this.broadcast(signedTransaction, tronWeb);
 
       if (result?.result) callbacks && callbacks();
       return result;
@@ -183,7 +183,7 @@ export class Contract {
         tradeObj?.transaction ? tradeObj.transaction : tradeObj,
         tronWeb
       );
-      const result = await this.broadCast(signedTransaction, tronWeb);
+      const result = await this.broadcast(signedTransaction, tronWeb);
 
       if (result?.result) callbacks && callbacks();
       return result;
