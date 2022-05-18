@@ -24,9 +24,23 @@ function App() {
 
   const initUserInfo = async (userAddress) => {
     setDefaultAccount(userAddress);
-    const accountInfo = await window.tronWeb.trx.getAccount(userAddress);
-    const accountBalance = new BigNumber(accountInfo.balance).div(trxPrecision);
-    setDefaultAccountBalance(accountBalance);
+    updateAccountBalance(userAddress);
+  };
+
+  const resetDefaultAccount = () => {
+    setDefaultAccount('');
+    setDefaultAccountBalance('--');
+  };
+
+  const updateAccountBalance = async (userAddress) => {
+    const accountInfo = await window.tronWeb.trx.getAccount(userAddress? userAddress: defaultAccount);
+    if (accountInfo.balance) {
+      const accountBalance = new BigNumber(accountInfo.balance).div(trxPrecision);
+      setDefaultAccountBalance(accountBalance);
+    } else {
+      const accountBalance = new BigNumber(accountInfo.balance).div(trxPrecision);
+      setDefaultAccountBalance('0');
+    }
   };
 
   const activate = async () => {
@@ -46,28 +60,22 @@ function App() {
   const addListener = () => {
     setAdded(true);
     TronWebConnector.on('accountsChanged', res => {
-      if (res.action === 'accountsChanged') {
-        setDefaultAccount(res.data.address);
-        setAccountsChangedMsg(`Current account address is: ${res.data.address}`);
-      }
+      setDefaultAccount(res.data.address);
+      setAccountsChangedMsg(`Current account address is: ${res.data.address}`);
     })
 
     TronWebConnector.on('chainChanged', res => {
-      if (res.action === 'chainChanged') {
-        setAccountsChangedMsg(`Current account fullNode is: ${res.data.node.fullNode}`);
-      }
+      setAccountsChangedMsg(`Current account fullNode is: ${res.data.node.fullNode}`);
+      updateAccountBalance();
     })
 
     TronWebConnector.on('disconnectWeb', res => {
-      if (res.action === 'disconnectWeb') {
-        setAccountsChangedMsg(`disconnect website name: ${res.data.websiteName}`);
-      }
+      setAccountsChangedMsg(`disconnect website name: ${res.data.websiteName}`);
+      resetDefaultAccount();
     })
 
     TronWebConnector.on('connectWeb', res => {
-      if (res.action === 'connectWeb') {
-        setAccountsChangedMsg(`connect website name: ${res.data.websiteName}`);
-      }
+      setAccountsChangedMsg(`connect website name: ${res.data.websiteName}`);
     })
   };
 
