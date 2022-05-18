@@ -31,7 +31,7 @@ Clients may have to connect their TronLink wallet with the Dapp before triggerin
   Import "ContractInteract" at the top of your code.
 
   ```
-  import { ContractInteract } from '@widgets/contract-interact';
+  import { ContractInteract } from "@widgets/contract-interact";
   ```
 
   Contract function may require an Tron wallet address as target recipient.
@@ -67,8 +67,8 @@ Clients may have to connect their TronLink wallet with the Dapp before triggerin
   ### example: 
   ```
   const response = await ContractInteract.trigger(
-    'TGjgvdTWWrybVLaVeFqSyVqJQWjxqRYbaK', // Decentralized USD (USDD)
-    'name()'
+    "TGjgvdTWWrybVLaVeFqSyVqJQWjxqRYbaK", // Decentralized USD (USDD)
+    "name()"
   )
 
   // convert response.constant_result from Hex to ASCII to retrieve string value
@@ -125,16 +125,16 @@ Clients may have to connect their TronLink wallet with the Dapp before triggerin
   ```
   const { transaction, result } = await window.tronWeb.transactionBuilder.triggerSmartContract(
     CONTRACT,
-    'transfer(address,uint256)',
+    "transfer(address,uint256)",
     {
       feeLimit: 1_000_000,
       callValue: 0
     },
     [{
-      type: 'address',
+      type: "address",
       value: ACCOUNT
     }, {
-      type: 'uint256',
+      type: "uint256",
       value: 1000000
     }]
   );
@@ -186,16 +186,16 @@ Clients may have to connect their TronLink wallet with the Dapp before triggerin
 
   ### example: 
   ```
-  const address = 'TDqjTkZ63yHB19w2n7vPm2qAkLHwn9fKKk';
-  const functionSelector = 'approve(address,uint256)';
-  const exchangeAddress = 'TH1SvdkzHbeN7gYPKhtoDPtFe3V2nj9yVv';
-  const MAX_UINT256 = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+  const address = "TDqjTkZ63yHB19w2n7vPm2qAkLHwn9fKKk";
+  const functionSelector = "approve(address,uint256)";
+  const exchangeAddress = "TH1SvdkzHbeN7gYPKhtoDPtFe3V2nj9yVv";
+  const MAX_UINT256 = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
   const feeLimitCommon = 400000000;
   const feeLimitMin = 100000000;
   
   const parameters = [
-    { type: 'address', value: exchangeAddress },
-    { type: 'uint256', value: MAX_UINT256 }
+    { type: "address", value: exchangeAddress },
+    { type: "uint256", value: MAX_UINT256 }
     ];
 
   const transaction = await ContractInteract.trigger(
@@ -206,7 +206,7 @@ Clients may have to connect their TronLink wallet with the Dapp before triggerin
   );
 
   if (!transaction.result || !transaction.result.result) {
-    throw new Error('Unknown trigger error: ' + JSON.stringify(transaction.transaction));
+    throw new Error("Unknown trigger error: " + JSON.stringify(transaction.transaction));
   }
 
   const signedTransaction = await ContractInteract.sign(transaction.transaction);
@@ -331,7 +331,7 @@ Clients may have to connect their TronLink wallet with the Dapp before triggerin
   const response = await ContractInteract.send(
     ACCOUNT,
     "postMessage(string)",
-    { parameters: [{ type: 'string', value: 'Hello' }] }
+    { parameters: [{ type: "string", value: "Hello" }] }
   );
   ```
 
@@ -501,7 +501,7 @@ Clients may have to connect their TronLink wallet with the Dapp before triggerin
   ### example: 
   ```
   const response = await ContractInteract.sendTrx(
-    'TBHHa5Z6WQ1cRcgUhdvqdW4f728f2fiJmF',
+    "TBHHa5Z6WQ1cRcgUhdvqdW4f728f2fiJmF",
     1000000
   );
   ```
@@ -555,7 +555,7 @@ Clients may have to connect their TronLink wallet with the Dapp before triggerin
   const response = await ContractInteract.sendToken(
     ACCOUNT,
     10000,
-    '1000617'
+    "1000617"
   ); 
   ```
 
