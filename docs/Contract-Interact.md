@@ -19,7 +19,7 @@ Clients may have to connect their TronLink wallet with the Dapp before triggerin
   8. [sendToken](#sendtoken)
 
 ## Implementation tips
-  Clone the repo or copy "~/packages/contract-interact/" and import as "@widgets/contract-interact" in package.json.
+  Clone the repo or copy "~/packages/contract-interact/" and import it as local dependency with the preferred name "@widgets/contract-interact" in package.json.
 
   ```
     "dependencies": {
