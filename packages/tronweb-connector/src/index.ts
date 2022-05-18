@@ -118,6 +118,10 @@ export class Connector {
   };
 
   on = (_action: string, cb: any) => {
+    if (!_action || !cb) {
+      return false;
+    }
+
     let actionName = _action;
     if (_action === 'chainChanged') actionName = 'setNode';
     window.addEventListener('message', res => {
@@ -127,6 +131,8 @@ export class Connector {
         return false;
       }
     });
+
+    return true;
   };
 }
 
