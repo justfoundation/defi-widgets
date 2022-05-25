@@ -20,7 +20,6 @@ Clients may have to connect their TronLink wallet with the Dapp before triggerin
 
 ## Implementation tips
   Clone the repo or copy "~/packages/contract-interact/" and import it as local dependency with the preferred name "@widgets/contract-interact" in package.json.
-
   ```
     "dependencies": {
       ...
@@ -28,8 +27,8 @@ Clients may have to connect their TronLink wallet with the Dapp before triggerin
       ...
     }
   ```
-  Import "ContractInteract" at the top of your code.
 
+  Import it at the top of your code.
   ```
   import { ContractInteract } from "@widgets/contract-interact";
   ```
@@ -48,7 +47,7 @@ Clients may have to connect their TronLink wallet with the Dapp before triggerin
 
   All functions are [asynchronous](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function) and the await keyword is permitted within it. The return type is [Promise object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise).
 
-  Check js files in "~/defi-demo/src/routes/" for real world implementation.
+  Check "~/defi-demo/src/routes/contract.js" for real world implementation.
 
   Check "~/packages/contract-interact/src/index.ts" or "~/packages/contract-interact/dist/index.d.ts" for code source.
 
@@ -633,3 +632,8 @@ Clients may have to connect their TronLink wallet with the Dapp before triggerin
     "origin_energy_limit": 10000000
   }
   ```
+
+
+reference:
+
+[mozilla](#https://developer.mozilla.org)
