@@ -46,7 +46,7 @@ As the rate of token issuance accelerates, it has become increasingly difficult 
   const sunSwapDefaultListUri = "https://list.justswap.link/justswap.json"
   ```
 
-  All functions are [asynchronous](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function) and the await keyword is permitted within it. The return type is [Promise object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise).\
+  All functions are [asynchronous](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function) and the await keyword is permitted within it. The return type is [Promise object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise).
 
   Return response type in Promise:
   ```
@@ -1029,6 +1029,6 @@ As the rate of token issuance accelerates, it has become increasingly difficult 
   ```
 
 
-reference:
+Reference:
 
-[uniswap](#https://uniswap.org/blog/token-lists)
+[uniswap Token List](#https://uniswap.org/blog/token-lists)
