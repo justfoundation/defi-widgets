@@ -13,7 +13,7 @@ import {
 } from '@widgets/transaction-confirm';
 import { ContractInteract } from '@widgets/contract-interact';
 import Menu from '../components/menu';
-const { trigger, sign, broadCast, send } = ContractInteract;
+const { trigger, sign, broadcast, send } = ContractInteract;
 
 function App() {
   const [txID, setTxID] = useState('');
@@ -86,7 +86,7 @@ function App() {
       }
       console.log(signedTransaction, 'signedTransaction');
 
-      const result = await broadCast(signedTransaction);
+      const result = await broadcast(signedTransaction);
 
       if (!intlObj.continuous) {
         console.log(result, 'result', intlObj);

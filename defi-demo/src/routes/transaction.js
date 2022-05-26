@@ -14,7 +14,7 @@ import {
   setVariablesInterval
 } from '@widgets/transaction-confirm';
 import Menu from '../components/menu';
-const { trigger, sign, broadCast, send, sendTrx } = ContractInteract;
+const { trigger, sign, broadcast, send, sendTrx } = ContractInteract;
 
 function App() {
   const [defaultAccount, setDefaultAccount] = useState('');
