@@ -6,9 +6,33 @@ interface ResultType {
   data?: any;
 }
 
+export class EventEmitter {
+  private _events: any;
+  constructor() {
+    this._events = {};
+  }
+  on(event: string | number,callback: any) {
+    let callbacks = this._events[event] || [];
+    callbacks.push(callback);
+    this._events[event] = callbacks;
+    return this;
+  }
+  off(event: string | number,callback: any) {
+    let callbacks = this._events[event];
+    this._events[event] = callbacks && callbacks.filter((fn: any) => fn !== callback);
+    return this;
+  }
+  emit(event: string | number, ...args: any[]) {
+    const callbacks = this._events[event];
+    callbacks.forEach((fn: { apply: (arg0: null, arg1: any[]) => any; }) => fn.apply(null,args));
+    return this;
+  }
+}
+
 export class SignSteps {
   public stepNumber: number = 0;
   public completeNumber: number = 0;
+  public signStepsEvent = new EventEmitter();
 
   private errorMessage = (msg: string) => {
     const error: ResultType = { success: false, msg };
@@ -33,6 +57,22 @@ export class SignSteps {
     try {
       functions.map(async (func) => {
         await func();
+        this.setStepNumber(++this.completeNumber);
+      })
+      callbacks && callbacks();
+      return this.successData({ completedAmount: this.completeNumber });
+    } catch (error) {
+      this.setStepNumber(this.completeNumber);
+      return this.errorMessage(`error: Continuous execution error, currently executed to the ${this.completeNumber} step, error message: ${error}`);
+    }
+  }
+
+  public executeSigns = async (functions: Array<Function>, { callbacks = () => {}}) => {
+    this.completeNumber = 0;
+    try {
+      functions.map(async (func) => {
+        await func();
+        this.signStepsEvent.emit('signStepNumber', ++this.completeNumber);
         this.setStepNumber(++this.completeNumber);
       })
       callbacks && callbacks();
