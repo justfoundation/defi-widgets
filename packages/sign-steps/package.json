@@ -33,7 +33,7 @@
     "singleQuote": true,
     "trailingComma": "es5"
   },
-  "name": "sign-steps",
+  "name": "@widgets/sign-steps",
   "author": "",
   "module": "dist/sign-steps.esm.js",
   "size-limit": [

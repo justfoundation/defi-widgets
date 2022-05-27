@@ -6,11 +6,15 @@ interface ResultType {
   data?: any;
 }
 
-export class EventEmitter {
+export class Signs {
+  public stepNumber: number = 0;
+  public completeNumber: number = 0;
   private _events: any;
+
   constructor() {
     this._events = {};
   }
+
   on(event: string | number,callback: any) {
     let callbacks = this._events[event] || [];
     callbacks.push(callback);
@@ -27,12 +31,6 @@ export class EventEmitter {
     callbacks.forEach((fn: { apply: (arg0: null, arg1: any[]) => any; }) => fn.apply(null,args));
     return this;
   }
-}
-
-export class SignSteps {
-  public stepNumber: number = 0;
-  public completeNumber: number = 0;
-  public signStepsEvent = new EventEmitter();
 
   private errorMessage = (msg: string) => {
     const error: ResultType = { success: false, msg };
@@ -52,7 +50,7 @@ export class SignSteps {
     this.stepNumber = stepNumber;
   }
 
-  public executeSignsSimple = async (functions: Array<Function>, { callbacks = () => {}}) => {
+  public executeSignsSimple = async (functions: Array<Function>, { callbacks = () => {}} = {}) => {
     this.completeNumber = 0;
     try {
       functions.map(async (func) => {
@@ -67,12 +65,12 @@ export class SignSteps {
     }
   }
 
-  public executeSigns = async (functions: Array<Function>, { callbacks = () => {}}) => {
+  public executeSigns = async (functions: Array<Function>, { callbacks = () => {}} = {}) => {
     this.completeNumber = 0;
     try {
       functions.map(async (func) => {
         await func();
-        this.signStepsEvent.emit('signStepNumber', ++this.completeNumber);
+        this.emit('signStepNumber', ++this.completeNumber);
         this.setStepNumber(++this.completeNumber);
       })
       callbacks && callbacks();
@@ -83,3 +81,5 @@ export class SignSteps {
     }
   }
 }
+
+export const SignSteps = new Signs();
