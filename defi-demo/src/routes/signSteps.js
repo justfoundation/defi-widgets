@@ -74,7 +74,7 @@ function App() {
 
   const continuousSign = () => {
     // @ts-ignore
-    executeSignsSimple([sendTrxFunc(), sendTokenFunc()]);
+    executeSignsSimple([sendTrxFunc, sendTokenFunc]);
   }
 
   return (

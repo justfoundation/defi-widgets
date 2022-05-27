@@ -53,10 +53,13 @@ export class Signs {
   public executeSignsSimple = async (functions: Array<Function>, { callbacks = () => {}} = {}) => {
     this.completeNumber = 0;
     try {
-      functions.map(async (func) => {
-        await func();
-        this.setStepNumber(++this.completeNumber);
-      })
+      for (let i = 0; i < functions.length; i++) {
+        const res = await functions[i]();
+        if (res || res == undefined) {
+          this.setStepNumber(++this.completeNumber);
+          continue;
+        }
+      }
       callbacks && callbacks();
       return this.successData({ completedAmount: this.completeNumber });
     } catch (error) {
