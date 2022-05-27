@@ -10,6 +10,7 @@ function Menu() {
             {/* <Link to="/confirm">Transaction-Confirm Demo</Link> */}
             <Link to="/transaction">Transaction-Confirm Demo</Link>
             <Link to="/tokenlist">Token-List Demo</Link>
+            <Link to="/signsteps">Sign-Steps Demo</Link>
         </section>
     )
 }
