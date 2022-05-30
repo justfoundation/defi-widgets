@@ -2,16 +2,15 @@ import { useState, useEffect } from 'react';
 import '../App.scss';
 import BigNumber from 'bignumber.js';
 import { TronWebConnector } from '@widgets/tronweb-connector';
-import { ContractInteract } from '@widgets/contract-interact';
 import { SignSteps } from '@widgets/sign-steps';
 import Menu from '../components/menu';
-const { send, sendTrx, sendToken } = ContractInteract;
 const { getStepNumber, executeSignsSimple } = SignSteps;
 
 function App() {
   const [defaultAccount, setDefaultAccount] = useState(null);
   const [defaultAccountBalance, setDefaultAccountBalance] = useState('--');
   const [accountsChangedMsg, setAccountsChangedMsg] = useState('');
+  const MAX_UINT256 = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
 
   const trxPrecision = 1e6;
 
@@ -21,7 +20,7 @@ function App() {
       // @ts-ignore
       initUserInfo(window.tronWeb.defaultAddress.base58);
       const startStepNumber = getStepNumber();
-      console.log(startStepNumber);
+      // console.log(startStepNumber);
     }
     setAccountsChangedMsg('');
   }, []);
@@ -43,38 +42,26 @@ function App() {
     }
   };
 
-  const sendTrxFunc = async () => {
+  const continuousSign = async () => {
     // @ts-ignore
-    const res = await sendTrx(
-      'TBHHa5Z6WQ1cRcgUhdvqdW4f728f2fiJmF',
-      1000000
-    );
-
-    if (res?.result) {
-      setAccountsChangedMsg('Send 1 TRX to TBHHa5Z6WQ1cRcgUhdvqdW4f728f2fiJmF success');
-    } else {
-      setAccountsChangedMsg(res.msg);
+    const params1 = {
+      address: 'TLBaRhANQoJFTqre9Nf1mjuwNWjCJeYqUL', // usdj
+      functionSelector: 'approve(address,uint256)',
+      parameters: [
+        { type: 'address', value: 'TSgZncDVzLq5SbEsCKAeviuG7nPKtJwRzU' },
+        { type: 'uint256', value: MAX_UINT256 }
+      ],
+      options: {},
     }
-  }
-
-  const sendTokenFunc = async () => {
-    // @ts-ignore
-    const res = await sendToken(
-      'TBHHa5Z6WQ1cRcgUhdvqdW4f728f2fiJmF',
-      10000,
-      '1000617'
-    );
-
-    if (res?.result) {
-      setAccountsChangedMsg('Send 0.01 TRC10 Token to TBHHa5Z6WQ1cRcgUhdvqdW4f728f2fiJmF success');
-    } else {
-      setAccountsChangedMsg(res.msg);
+    const params2 = {
+      address: 'TSgZncDVzLq5SbEsCKAeviuG7nPKtJwRzU',
+      functionSelector: 'mint(uint256)',
+      parameters: [{ type: 'uint256', value: '100' }],
+      options: {},
+      // callbacks: 
     }
-  }
-
-  const continuousSign = () => {
-    // @ts-ignore
-    executeSignsSimple([sendTrxFunc, sendTokenFunc]);
+    const stepNumber = await executeSignsSimple([params1, params2]);
+    console.log(stepNumber);
   }
 
   return (

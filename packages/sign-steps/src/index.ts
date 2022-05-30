@@ -1,9 +1,20 @@
 'use strict';
+import { ContractInteract } from '@widgets/contract-interact';
+const { send } = ContractInteract;
 
 interface ResultType {
   success: boolean;
   msg?: string;
   data?: any;
+}
+
+interface TriggerType {
+  address: string;
+  functionSelector: string;
+  parameters?: [];
+  options?: Object;
+  callbacks?: () => {};
+  tronweb?: {};
 }
 
 export class Signs {
@@ -50,14 +61,17 @@ export class Signs {
     this.stepNumber = stepNumber;
   }
 
-  public executeSignsSimple = async (functions: Array<Function>, { callbacks = () => {}} = {}) => {
+  public executeSignsSimple = async (params: Array<TriggerType>, { callbacks = () => {}} = {}) => {
     this.completeNumber = 0;
     try {
-      for (let i = 0; i < functions.length; i++) {
-        const res = await functions[i]();
-        if (res || res == undefined) {
+      for (let i = 0; i < params.length; i++) {
+        const { address, functionSelector, parameters = [], options = {}, callbacks = () => {}, tronweb = {} } = params[i];
+        const res = await send(address, functionSelector, { parameters, options, callbacks, tronweb });
+        if (res?.transaction?.txID) {
           this.setStepNumber(++this.completeNumber);
           continue;
+        } else {
+          console.log('error: ', res);
         }
       }
       callbacks && callbacks();
@@ -68,14 +82,18 @@ export class Signs {
     }
   }
 
-  public executeSigns = async (functions: Array<Function>, { callbacks = () => {}} = {}) => {
+  public executeSigns = async (params: Array<TriggerType>, { callbacks = () => {}} = {}) => {
     this.completeNumber = 0;
     try {
-      functions.map(async (func) => {
-        await func();
-        this.emit('signStepNumber', ++this.completeNumber);
-        this.setStepNumber(++this.completeNumber);
-      })
+      for (let i = 0; i < params.length; i++) {
+        const { address, functionSelector, parameters = [], options = {}, callbacks = () => {}, tronweb = {} } = params[i];
+        const res = await send(address, functionSelector, { parameters, options, callbacks, tronweb });
+        if (res?.transaction?.txID) {
+          this.emit('signStepNumber', ++this.completeNumber);
+          this.setStepNumber(++this.completeNumber);
+          continue;
+        }
+      }
       callbacks && callbacks();
       return this.successData({ completedAmount: this.completeNumber });
     } catch (error) {
