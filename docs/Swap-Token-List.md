@@ -8,6 +8,7 @@ Anyone can create and maintain a token list, as long as they follow the specific
 
 As the Crypto space continues to evolve, we continue to see exponential growth in the number of tokens being issued. This maturation reflects the success of permissionless innovation, a trend we expect will only accelerate in the future: everything of value will be tokenized.
 
+
 As the rate of token issuance accelerates, it has become increasingly difficult for users to filter out high quality, legitimate tokens from scams, fakes, and duplicates. Across the space, projects are managing and maintaining rapidly growing token lists. The end result is a lot of wasted time, slow listing processes and scammed users. In addition, builders should spend their time building, not deciding which tokens are legitimate and which are scams, fakes or duplicates.
 
 
@@ -1029,6 +1030,5 @@ As the rate of token issuance accelerates, it has become increasingly difficult 
   ```
 
 
-Reference:
-
-[uniswap Token List](#https://uniswap.org/blog/token-lists)
+## Reference:
+[Uniswap Token List](#https://uniswap.org/blog/token-lists)
