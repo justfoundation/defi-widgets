@@ -4,14 +4,9 @@ import BigNumber from 'bignumber.js';
 import { TronWebConnector } from '@widgets/tronweb-connector';
 import { ContractInteract } from '@widgets/contract-interact';
 import {
-  OpenTransModal,
-  setTransactionsData,
-  getTransactionInfo,
-  getDescription,
-  checkPendingTransactions,
-  logTransaction,
-  saveTransactions,
-  setVariablesInterval
+  openTransModal,
+  addNewTransactionToList,
+  startPendingTransactionCheck
 } from '@widgets/transaction-confirm';
 import Menu from '../components/menu';
 const { trigger, sign, broadcast, send, sendTrx } = ContractInteract;
@@ -43,17 +38,20 @@ function App() {
   }
 
   const sendTrxFunc = async () => {
-    OpenTransModal({step: 1});
+    openTransModal({step: 1});
     const res = await sendTrx(
       'TBHHa5Z6WQ1cRcgUhdvqdW4f728f2fiJmF',
       1000000
     );
 
     if (res?.result) {
-      console.log(res); // txid
-      OpenTransModal({step: 2 }, {title: 'Send TRX success'});
+      console.log(res);
+      const tx = res
+      openTransModal({step: 2, txId: tx.txid}, {title: 'Send TRX success'});
+      addNewTransactionToList(tx, {title: 'Send 1 TRX to somewhere'});
+      startPendingTransactionCheck(3000);
     } else {
-      OpenTransModal({step: 3}, {title: 'Send TRX failed'});
+      openTransModal({step: 3}, {title: 'Send TRX failed'});
     }
   }
 

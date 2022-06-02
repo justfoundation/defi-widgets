@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import '../App.scss';
 import BigNumber from 'bignumber.js';
 import {
-    OpenTransModal,
-    setTransactionsData,
+    openTransModal,
+    addNewTransactionToList,
     getTransactionInfo,
     getDescription,
     checkPendingTransactions,
     logTransaction,
-    saveTransactions,
-    setVariablesInterval
+    updateTransactionInList,
+    startPendingTransactionCheck
 } from '@widgets/transaction-confirm';
 import { ContractInteract } from '@widgets/contract-interact';
 import Menu from '../components/menu';
@@ -65,7 +65,7 @@ function App() {
   ) => {
     try {
       //   if (!this.rootStore.network.defaultAccount) return; // 如果没登录，禁止所有交易操作触发
-      OpenTransModal({ step: 1 }, intlObj);
+      openTransModal({ step: 1 }, intlObj);
       // console.log('address', address, 'functionSelector', functionSelector, 'parameters', parameters);
       const transaction = await trigger(
           address,
@@ -80,7 +80,7 @@ function App() {
 
       const signedTransaction = await sign(transaction.transaction);
       if (!signedTransaction) {
-        OpenTransModal({ step: 3 }, intlObj);
+        openTransModal({ step: 3 }, intlObj);
         // getDescriptionFn(3, { obj: { value: 0.1, symbol: 'SUN' }, title: '授权失败' });
         return;
       }
@@ -90,13 +90,13 @@ function App() {
 
       if (!intlObj.continuous) {
         console.log(result, 'result', intlObj);
-        OpenTransModal({ step: 2, txId: result.transaction.txID }, intlObj);
+        openTransModal({ step: 2, txId: result.transaction.txID }, intlObj);
       }
 
       if (result && result.result) {
-        setTransactionsData(result.transaction.txID, intlObj);
+        addNewTransactionToList(result.transaction.txID, intlObj);
       } else {
-        OpenTransModal({ step: 3 }, intlObj);
+        openTransModal({ step: 3 }, intlObj);
         return;
       }
 
@@ -161,12 +161,12 @@ function App() {
     return result && result.transaction ? result.transaction.txID : '';
   };
   // 2
-  const setTransactionsDataFn = () => {
+  const addNewTransactionToListFn = () => {
     if (txID) {
-        setTransactionsData(txID, intlObj);
-        console.log('SetTransactionsData', { txID, intlObj });
+        addNewTransactionToList(txID, intlObj);
+        console.log('addNewTransactionToList', { txID, intlObj });
     } else {
-        console.log('SetTransactionsData Error: No Transactions');
+        console.log('addNewTransactionToList Error: No Transactions');
     }
   };
   // 3
@@ -210,29 +210,29 @@ function App() {
   };
 
   // 7
-  const saveTransactionsFn = async () => {
-    saveTransactions({
+  const updateTransactionInListFn = async () => {
+    updateTransactionInList({
         checkCnt: 0,
         customObj: intlObj,
         showPending: true,
         status: 1,
-        title: 'saveTransactions',
+        title: 'updateTransactionInList',
         tx: txID
     });
-    console.log('SaveTransactions: ', {
+    console.log('updateTransactionInList: ', {
         checkCnt: 0,
         customObj: intlObj,
         showPending: true,
         status: 1,
-        title: 'saveTransactions',
+        title: 'updateTransactionInList',
         txID
     });
   };
 
   // 8
-  const setVariablesIntervalFn = async () => {
-    setVariablesInterval();
-    console.log('SetVariablesInterval');
+  const startPendingTransactionCheckFn = async () => {
+    startPendingTransactionCheck();
+    console.log('startPendingTransactionCheck');
   };
 
   return (
@@ -240,8 +240,8 @@ function App() {
       <Menu />
       <section className='content w750'>
         <div className='items'>
-          <div className='item' onClick={openTransModal}>1. OpenTransModal</div>
-          <div className='item' onClick={setTransactionsDataFn}>2. SetTransactionsData</div>
+          <div className='item' onClick={openTransModal}>1. openTransModal</div>
+          <div className='item' onClick={addNewTransactionToListFn}>2. addNewTransactionToList</div>
         </div>
         <div className='items'>
           <div className='item' onClick={getTransactionInfoFn}>3. GetTransactionInfo</div>
@@ -260,8 +260,8 @@ function App() {
           <div className='item' onClick={e => logTransactionFn(3)}>10. LogTransaction（status=3）</div>
         </div>
         <div className='items'>
-          <div className='item' onClick={saveTransactionsFn}>11. SaveTransactions</div>
-          <div className='item' onClick={setVariablesIntervalFn}>12. SetVariablesInterval</div>
+          <div className='item' onClick={updateTransactionInListFn}>11. updateTransactionInList</div>
+          <div className='item' onClick={startPendingTransactionCheckFn}>12. startPendingTransactionCheck</div>
         </div>
         <div className="wg-modal-root"></div>
         <div className="wg-notify-ques"></div>
