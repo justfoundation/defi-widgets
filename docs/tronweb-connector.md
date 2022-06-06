@@ -83,7 +83,7 @@ Developer can listen to the TronLink events using the `on` method
 | setAccount | when account was set | 3.0.0 |
 | setNode | when node was set | 3.0.0 |
 | accountsChanged | when switching accounts | 3.22.0 |
-| accountsChanged | when switching accounts | 3.22.0 |
+| chainChanged | when switching chains | 3.22.0 |
 | connectWeb | when the `active connection` dapp is made in the plugin popup page | 3.22.0 |
 | acceptWeb | when a user `accepts` an authorization request initiated by dapp in the plugin whitelist authorization page | 3.22.0 |
 | disconnectWeb | when the `active reject` dapp is in the plugin popup page | 3.22.0 |
@@ -95,5 +95,17 @@ Developer can listen to the TronLink events using the `on` method
 ```
 TronwebConnector.on('accountsChanged', res => {
   console.log('TronLink account changed')
+})
+
+TronWebConnector.on('chainChanged', res => {
+  console.log(`Current account fullnode is ${res.data.node.fullNode}`);
+})
+
+TronWebConnector.on('disconnectWeb', res => {
+  console.log(`User rejects the authorization request on ${res.data.websiteName}`);
+})
+
+TronWebConnector.on('connectWeb', res => {
+  console.log(`User accepts the authorization request on ${res.data.websiteName}`);
 })
 ```
