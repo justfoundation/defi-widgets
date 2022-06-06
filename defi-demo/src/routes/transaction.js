@@ -1,10 +1,14 @@
 import { ContractInteract } from '@widgets/contract-interact';
-import { OpenTransModal } from '@widgets/transaction-confirm';
 import { TronWebConnector } from '@widgets/tronweb-connector';
 import { Steps } from 'antd';
 import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 import '../App.scss';
+import {
+  openTransModal,
+  addNewTransactionToList,
+  startPendingTransactionCheck
+} from '@widgets/transaction-confirm';
 import Menu from '../components/menu';
 const { trigger, sign, broadcast, send, sendTrx } = ContractInteract;
 const { Step } = Steps;
@@ -41,25 +45,22 @@ function App() {
   }
 
   const sendTrxFunc = async () => {
-    try {
-      OpenTransModal({ step: 1 });
-      nextStep();
-    
-      const res = await sendTrx(
-        'TBHHa5Z6WQ1cRcgUhdvqdW4f728f2fiJmF',
-        1000000
-      );
+    openTransModal({step: 1});
+    nextStep();
 
-      if (res?.result) {
-        nextStep();
-        OpenTransModal({ step: 2 }, { title: 'Send TRX success' });
-      } else {
-        backStep();
-        OpenTransModal({ step: 3 }, { title: 'Send TRX failed' });
-      }
-    }
-    catch (e) {
-      OpenTransModal({ step: 3 }, { title: 'Send TRX failed due to ' + e.message });
+    const res = await sendTrx(
+      'TBHHa5Z6WQ1cRcgUhdvqdW4f728f2fiJmF',
+      1000000
+    );
+
+    if (res?.result) {
+      const tx = res
+      openTransModal({step: 2, txId: tx.txid}, {title: 'Send TRX success'});
+      addNewTransactionToList(tx, {title: 'Send 1 TRX to somewhere'});
+      startPendingTransactionCheck(3000);
+      nextStep();
+    } else {
+      openTransModal({step: 3}, {title: 'Send TRX failed'});
       backStep();
     }
   }

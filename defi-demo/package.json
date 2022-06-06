@@ -6,7 +6,8 @@
     "@testing-library/jest-dom": "^5.16.2",
     "@testing-library/react": "^12.1.3",
     "@testing-library/user-event": "^13.5.0",
-    "@widgets/contract-interact": "../packages/contract-interact/",
+    "@widgets/contract-interact": "file:../packages/contract-interact",
+    "@widgets/sign-steps": "file:../packages/sign-steps",
     "@widgets/swap-token-list": "../packages/swap-token-list/",
     "@widgets/transaction-confirm": "../packages/transaction-confirm/",
     "@widgets/tronweb-connector": "file:../packages/tronweb-connector",
@@ -19,6 +20,7 @@
     "react-router-dom": "^6.2.2",
     "react-scripts": "5.0.0",
     "sass": "^1.49.9",
+    "sign-steps": "file:../packages/sign-steps",
     "tronweb": "^3.2.6",
     "url-loader": "^4.1.1",
     "web-vitals": "^2.1.4"

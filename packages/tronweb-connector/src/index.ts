@@ -1,8 +1,9 @@
 'use strict';
 
 interface ResultType {
-  msg: string;
   success: boolean;
+  msg: string;
+  errorCode: number;
 }
 
 export class Connector {
@@ -25,14 +26,14 @@ export class Connector {
     return result;
   };
 
-  private errorMessage = (msg: string) => {
-    const error: ResultType = { success: false, msg };
+  private errorMessage = (msg: string, errorCode: number) => {
+    const error: ResultType = { success: false, msg, errorCode };
     return error;
   };
 
   handleTronWallet = async (tron: any) => {
     if (!tron) {
-      return this.errorMessage(`error: tronweb not provided`);
+      return this.errorMessage(`error: tronlink not provided`, 4002);
     }
     if (tron?.defaultAddress?.base58) {
       this.defaultAccount = tron.defaultAddress.base58;
@@ -51,7 +52,7 @@ export class Connector {
         return tronWeb;
       }
       if (res.code === 4001) {
-        const error = this.errorMessage(`error: Current connection refused`);
+        const error = this.errorMessage(`error: user refuse to authorize`, 4001);
         return error;
       }
     }
@@ -112,11 +113,15 @@ export class Connector {
       this.on('connectWeb', this.connectListener);
       return tron;
     } catch (e) {
-      return this.errorMessage(`error: ${e}`);
+      return this.errorMessage(`error: ${e}`, 4003);
     }
   };
 
   on = (_action: string, cb: any) => {
+    if (!_action || !cb) {
+      return false;
+    }
+
     let actionName = _action;
     if (_action === 'chainChanged') actionName = 'setNode';
     window.addEventListener('message', res => {
@@ -126,6 +131,8 @@ export class Connector {
         return false;
       }
     });
+
+    return true;
   };
 }
 

@@ -33,7 +33,7 @@
     "singleQuote": true,
     "trailingComma": "es5"
   },
-  "name": "sign-steps",
+  "name": "@widgets/sign-steps",
   "author": "",
   "module": "dist/sign-steps.esm.js",
   "size-limit": [
@@ -57,5 +57,8 @@
     "tsdx": "^0.14.1",
     "tslib": "^2.3.1",
     "typescript": "^3.9.10"
+  },
+  "dependencies": {
+    "@widgets/contract-interact": "file:../contract-interact"
   }
 }
