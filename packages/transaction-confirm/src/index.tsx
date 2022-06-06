@@ -15,20 +15,7 @@ interface CustomObjType {
   cancelled?: string;
 }
 
-const getTransactionInfo = (tx: string, tronweb = null) => {
-  const tronWeb = tronweb || (window as any).tronWeb;
-  return new Promise((resolve, reject) => {
-    tronWeb.trx.getConfirmedTransaction(tx, (e: any, r: unknown) => {
-      if (!e) {
-        resolve(r);
-      } else {
-        reject(e);
-      }
-    });
-  });
-};
-
-export const OpenTransModal = async (
+export const openTransModal = async (
   stepInfo = { step: 0, txId: '' },
   customObj: CustomObjType = {},
 ) => {
@@ -52,7 +39,7 @@ export const OpenTransModal = async (
   };
 };
 
-export const setTransactionsData = (
+export const addNewTransactionToList = (
   tx: string,
   customObj: any,
   saveAmount: number = 10,
@@ -84,13 +71,119 @@ export const setTransactionsData = (
   }
 };
 
-const getDescription = async (
+export const updateTransactionInList = (record: any, tronweb: any = null) => {
+  const { tx, status } = record;
+  const tronWeb = tronweb || (window as any).tronWeb;
+  let data =
+    window.localStorage.getItem(
+      `${tronWeb.defaultAddress.base58}_transaction`
+    ) || '[]';
+  let dataArr = JSON.parse(data);
+  let pos: string | number = 'true';
+  dataArr.map((item: { tx: any }, index: number) => {
+    if (item.tx.txid === tx.txid) {
+      pos = index;
+    }
+  });
+  
+  if (pos === 'true') {
+    return;
+  }
+  
+  dataArr[pos] = record;
+
+  if (status !== 1) {
+    dataArr.splice(pos, 1);
+  }
+
+  window.localStorage.setItem(
+    `${tronWeb.defaultAddress.base58}_transaction`,
+    JSON.stringify(dataArr)
+  );
+};
+
+export const logTransaction = async (
+  item: {
+    checkCnt?: any;
+    tx?: any;
+    status?: any;
+    showPending?: any;
+    customObj?: any;
+  },
+  status: number,
+  lang: string = 'en'
+) => {
+  item.status = status;
+  if (status === 1) {
+    item.showPending = false;
+  }
+  const { customObj } = item;
+
+  const intlZh = {
+    pending: '待确认',
+    confirmed: '已确认',
+    failed: '失败',
+  };
+
+  const intlEn = {
+    pending: 'Pending',
+    confirmed: 'Confirmed',
+    failed: 'Failed',
+  };
+
+  const intl = lang === 'zh' ? intlZh : intlEn;
+
+  let description = intl.pending;
+  if (status === 2) description = intl.confirmed;
+  if (status === 3) description = intl.failed;
+
+  const notifyContent = (
+    <div className={classNames(styles.notification, 'notification')}>
+      <div className="message">{customObj?.title}</div>
+      <div className="description">
+        {await getDescription(status, item, description)}
+      </div>
+      <div className={classNames(styles.notifyClose, 'notify-close')}>{<CloseOutlined />} </div>
+    </div>
+  );
+
+  let container: any = document.querySelector('.wg-notify-root');
+  if (!container) {
+    container = document.createElement('div');
+    container.classList.add('wg-notify-root');
+    // container.innerHTML = renderToString(notifyContent);
+    container.innerHTML = renderToString(notifyContent);
+    document.body.appendChild(container);
+  } else {
+    // container.innerHTML = renderToString(notifyContent);
+    container.innerHTML = renderToString(notifyContent);
+  }
+  container.style.display = 'block';
+
+  let closeIcon: any = document.querySelector('.notify-close');
+  closeIcon.onclick = () => {
+    container.style.display = 'none';
+  };
+
+  updateTransactionInList(item);
+
+  setTimeout(
+    () => {
+      container.style.display = 'none';
+    },
+    status === 3 ? 30000 : 5000
+  );
+};
+
+export const getDescription = async (
   type: number,
   item: any,
   text: string,
 ) => {
   const tronscanLink = 'https://tronscan.io/#';
+  // const tronscanLink = 'https://nile.tronscan.org//#';
   const { tx, lang, view_on_tronscan } = item;
+  const { txid } = tx;
   let className = '';
   let statusText = '';
   switch (type) {
@@ -130,7 +223,7 @@ const getDescription = async (
       >
         <a
           className="typo-text-link"
-          href={`${tronscanLink}/transaction/${tx}`}
+          href={`${tronscanLink}/transaction/${txid}`}
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -156,18 +249,35 @@ const getDescription = async (
   const errTip: any = document.querySelector('.wg-notify-errTip');
   const notify: any = document.querySelector('.wg-trans-notify');
 
-  ques.onmouseover = () => {
-    errTip.style.display = 'block';
-  };
-  ques.onmouseend = () => {
-    errTip.style.display = 'none';
-  };
+  if (ques) {
+    ques.onmouseover = () => {
+      errTip.style.display = 'block';
+    };
+    ques.onmouseend = () => {
+      errTip.style.display = 'none';
+    };
+  }
 
-  setTimeout(() => {
-    notify.style.display = 'none';
-  }, 5000);
+  if (notify) {
+    setTimeout(() => {
+      notify.style.display = 'none';
+    }, 5000);
+  }
 
   return notifyDom;
+};
+
+export const getTransactionInfo = (txid: string, tronweb = null) => {
+  const tronWeb = tronweb || (window as any).tronWeb;
+  return new Promise((resolve, reject) => {
+    tronWeb.trx.getConfirmedTransaction(txid, (e: any, r: unknown) => {
+      if (!e) {
+        resolve(r);
+      } else {
+        reject(e);
+      }
+    });
+  });
 };
 
 export const checkPendingTransactions = (tronweb = null) => {
@@ -186,24 +296,17 @@ export const checkPendingTransactions = (tronweb = null) => {
           logTransaction(item, 1);
         }
         item.checkCnt++;
-        getTransactionInfo(tx)
+        getTransactionInfo(tx.txid)
           .then((r: any) => {
-            if (r) {
-              if (r?.ret[0]?.contractRet === 'SUCCESS') {
+            if (r && r.ret && r.ret[0] && r.ret[0].contractRet) {
+              if (r.ret[0].contractRet === 'SUCCESS') {
                 logTransaction(item, 2);
-              } else if (
-                r &&
-                r.ret &&
-                r.ret[0].contractRet &&
-                r.ret[0].contractRet != 'SUCCESS'
-              ) {
-                logTransaction(item, 3);
               } else {
-                if (item.checkCnt != undefined && item.checkCnt < 30) {
-                  setTimeout(checkPendingTransactions, 3000);
-                } else {
-                  logTransaction(item, 3);
-                }
+                logTransaction(item, 3);
+              }
+            } else {
+              if (item.checkCnt != undefined && item.checkCnt >= 30) {
+                logTransaction(item, 3);
               }
             }
           })
@@ -216,108 +319,7 @@ export const checkPendingTransactions = (tronweb = null) => {
   );
 };
 
-export const logTransaction = async (
-  item: {
-    checkCnt?: any;
-    tx?: any;
-    status?: any;
-    showPending?: any;
-    customObj?: any;
-  },
-  status: number,
-  lang: string = 'en'
-) => {
-  item.status = status;
-  if (status === 1) item.showPending = false;
-  const { customObj } = item;
-
-  const intlZh = {
-    pending: '待确认',
-    confirmed: '已确认',
-    failed: '失败',
-  };
-
-  const intlEn = {
-    pending: 'Pending',
-    confirmed: 'Confirmed',
-    failed: 'Failed',
-  };
-
-  const intl = lang === 'zh' ? intlZh : intlEn;
-
-  let description = intl.pending;
-  if (status === 2) description = intl.confirmed;
-  if (status === 3) description = intl.failed;
-
-  const notifyContent = (
-    <div className="notification">
-      <div className="message">{customObj.title}</div>
-      <div className="description">
-        {await getDescription(status, item, description)}
-      </div>
-      <div className={styles.notification}>
-        <div className="message">{customObj.title}</div>
-        <div className="description">
-          {await getDescription(status, item, description)}
-        </div>
-        <div className={classNames(styles.notifyClose, 'notify-close')}>{<CloseOutlined />} </div>
-      </div>
-    </div>
-  );
-
-  let container: any = document.querySelector('.wg-notify-root');
-  if (!container) {
-    container = document.createElement('div');
-    container.classList.add('wg-notify-root');
-    // container.innerHTML = renderToString(notifyContent);
-    container.innerHTML = renderToString(notifyContent);
-    document.body.appendChild(container);
-  } else {
-    // container.innerHTML = renderToString(notifyContent);
-    container.innerHTML = renderToString(notifyContent);
-  }
-  container.style.display = 'block';
-
-  let closeIcon: any = document.querySelector('.notify-close');
-  closeIcon.onclick = () => {
-    container.style.display = 'none';
-  };
-
-  saveTransactions(item);
-
-  setTimeout(
-    () => {
-      container.style.display = 'none';
-    },
-    status === 3 ? 30000 : 5000
-  );
-};
-
-export const saveTransactions = (record: any, tronweb: any = null) => {
-  const { tx } = record;
-  const tronWeb = tronweb || (window as any).tronWeb;
-  let data =
-    window.localStorage.getItem(
-      `${tronWeb.defaultAddress.base58}_transaction`
-    ) || '[]';
-  let dataArr = JSON.parse(data);
-  let pos: string | number = 'true';
-  dataArr.map((item: { tx: any }, index: number) => {
-    if (item.tx === tx) {
-      pos = index;
-    }
-  });
-  if (pos === 'true') {
-    return;
-  }
-  dataArr[pos] = record;
-  window.localStorage.setItem(
-    `${tronWeb.defaultAddress.base58}_transaction`,
-    JSON.stringify(dataArr)
-  );
-};
-
-export const setVariablesInterval = () => {
+export const startPendingTransactionCheck = (milliseconds: number = 3000) => {
   let interval = null;
   if (!interval) {
     interval = setInterval(async () => {
@@ -326,6 +328,6 @@ export const setVariablesInterval = () => {
       } catch (err) {
         console.log('interval error:' + err);
       }
-    }, 3000);
+    }, milliseconds);
   }
 };
