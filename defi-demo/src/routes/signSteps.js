@@ -87,7 +87,9 @@ function App() {
     // @ts-ignore
     setCurrentStep(0);
     setHideStepsStatus(false);
-    setStepStatusArray(['process', 'wait']);
+    updateStatusAtStep(1, 'wait');
+    updateStatusAtStep(2, 'wait');
+    setStatusMsg();
     
     removeSignStepsListeners();
     addSignStepsListeners();
@@ -110,14 +112,11 @@ function App() {
     }
     const response = await executeSignsSimple([params1, params2]);
 
-    if (response.success && response.data) {
+    setCurrentStep(2);
+    if (response.success && response.data && response.data.completedAmount && response.data.completedAmount > 0) {
       console.log('Signed step: ' + response.data.completedAmount);
-    } else if (response.msg) {
-      console.log('Error: ' + response.msg);
-    }
-
-    if (response.success === false || response.data.completedAmount < 1) {
-      setStepStatusArray(['error', 'error']);
+      setStatusMsg('Completed step: ' + response.data.completedAmount);
+    } else {
       setStatusMsg('Failed to complete continuous signature');
     }
   }
