@@ -65,20 +65,24 @@ export class Signs {
     this.completeNumber = 0;
     try {
       for (let i = 0; i < params.length; i++) {
+        this.setStepNumber(i+1);
+        this.emit('startAtStep', i+1);
+
         const { address, functionSelector, parameters = [], options = {}, callbacks = () => {}, tronweb = {} } = params[i];
         const res = await send(address, functionSelector, { parameters, options, callbacks, tronweb });
         if (res?.transaction?.txID) {
-          this.setStepNumber(++this.completeNumber);
+          this.completeNumber++;
+          this.emit('signedAtStep', i+1);
           continue;
         } else {
+          this.emit('errorAtStep', i+1);
           console.log('error: ', res);
         }
       }
       callbacks && callbacks();
       return this.successData({ completedAmount: this.completeNumber });
     } catch (error) {
-      this.setStepNumber(this.completeNumber);
-      return this.errorMessage(`error: Continuous execution error, currently executed to the ${this.completeNumber} step, error message: ${error}`);
+      return this.errorMessage(`error: Continuous execution error, currently executed to the ${this.getStepNumber()} step, error message: ${error}`);
     }
   }
 
@@ -86,19 +90,24 @@ export class Signs {
     this.completeNumber = 0;
     try {
       for (let i = 0; i < params.length; i++) {
+        this.setStepNumber(i+1);
+        this.emit('startAtStep', i+1);
+
         const { address, functionSelector, parameters = [], options = {}, callbacks = () => {}, tronweb = {} } = params[i];
         const res = await send(address, functionSelector, { parameters, options, callbacks, tronweb });
         if (res?.transaction?.txID) {
-          this.emit('signStepNumber', ++this.completeNumber);
-          this.setStepNumber(++this.completeNumber);
+          this.completeNumber++;
+          this.emit('signedAtStep', i+1);
           continue;
+        } else {
+          this.emit('errorAtStep', i+1);
+          console.log('error: ', res);
         }
       }
       callbacks && callbacks();
       return this.successData({ completedAmount: this.completeNumber });
     } catch (error) {
-      this.setStepNumber(this.completeNumber);
-      return this.errorMessage(`error: Continuous execution error, currently executed to the ${this.completeNumber} step, error message: ${error}`);
+      return this.errorMessage(`error: Continuous execution error, currently executed to the ${this.getStepNumber()} step, error message: ${error}`);
     }
   }
 }

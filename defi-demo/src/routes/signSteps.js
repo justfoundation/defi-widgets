@@ -4,12 +4,18 @@ import BigNumber from 'bignumber.js';
 import { TronWebConnector } from '@widgets/tronweb-connector';
 import { SignSteps } from '@widgets/sign-steps';
 import Menu from '../components/menu';
+import { Steps } from 'antd';
+
 const { getStepNumber, executeSignsSimple } = SignSteps;
+const { Step } = Steps;
 
 function App() {
   const [defaultAccount, setDefaultAccount] = useState(null);
   const [defaultAccountBalance, setDefaultAccountBalance] = useState('--');
-  const [accountsChangedMsg, setAccountsChangedMsg] = useState('');
+  const [hideStepsStatus, setHideStepsStatus] = useState(true);
+  const [statusMsg, setStatusMsg] = useState('');
+  const [stepStatusArray, setStepStatusArray] = useState([]);
+  const [currentStep, setCurrentStep] = useState(-1);
   const MAX_UINT256 = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
 
   const trxPrecision = 1e6;
@@ -22,7 +28,8 @@ function App() {
       const startStepNumber = getStepNumber();
       // console.log(startStepNumber);
     }
-    setAccountsChangedMsg('');
+    setHideStepsStatus(true);
+    setStatusMsg('');
   }, []);
 
   const initUserInfo = async (userAddress) => {
@@ -34,6 +41,40 @@ function App() {
     setDefaultAccountBalance(accountBalance);
   };
 
+  const updateStatusAtStep = (stepNumber, status) => {
+    var array = stepStatusArray;
+    array[stepNumber-1] = status;
+    setStepStatusArray(array);
+  };
+
+  const startEventCallback = (stepNumber) => {
+    console.log('Start at step ' + stepNumber);
+
+    setCurrentStep(stepNumber-1);
+    updateStatusAtStep(stepNumber, 'process');
+  };
+  const signedEventCallback = (stepNumber) => {
+    console.log('Signed at step ' + stepNumber);
+
+    updateStatusAtStep(stepNumber, 'finish');
+  };
+  const errorEventCallback = (stepNumber) => {
+    console.log('Error occurs at step ' + stepNumber);
+    
+    updateStatusAtStep(stepNumber, 'error');
+  };
+
+  const removeSignStepsListeners = () => {
+    SignSteps.off('startAtStep', startEventCallback);
+    SignSteps.off('signedAtStep', signedEventCallback);
+    SignSteps.off('errorAtStep', errorEventCallback);
+  }
+  const addSignStepsListeners = () => {
+    SignSteps.on('startAtStep', startEventCallback);
+    SignSteps.on('signedAtStep', signedEventCallback);
+    SignSteps.on('errorAtStep', errorEventCallback);
+  }
+
   const activate = async () => {
     const tronWeb = await TronWebConnector.activate();
 
@@ -44,6 +85,13 @@ function App() {
 
   const continuousSign = async () => {
     // @ts-ignore
+    setCurrentStep(0);
+    setHideStepsStatus(false);
+    setStepStatusArray(['process', 'wait']);
+    
+    removeSignStepsListeners();
+    addSignStepsListeners();
+    
     const params1 = {
       address: 'TLBaRhANQoJFTqre9Nf1mjuwNWjCJeYqUL', // usdj
       functionSelector: 'approve(address,uint256)',
@@ -60,14 +108,24 @@ function App() {
       options: {},
       // callbacks: 
     }
-    const stepNumber = await executeSignsSimple([params1, params2]);
-    console.log(stepNumber);
+    const response = await executeSignsSimple([params1, params2]);
+
+    if (response.success && response.data) {
+      console.log('Signed step: ' + response.data.completedAmount);
+    } else if (response.msg) {
+      console.log('Error: ' + response.msg);
+    }
+
+    if (response.success === false || response.data.completedAmount < 1) {
+      setStepStatusArray(['error', 'error']);
+      setStatusMsg('Failed to complete continuous signature');
+    }
   }
 
   return (
     <div className="App">
       <Menu />
-      <section className='content'>
+      <section className='content sign-steps'>
         {defaultAccount ?
           <>
             <div className='info'>
@@ -84,7 +142,17 @@ function App() {
             <div className='item' onClick={() => activate()}>Connect Wallet</div>
           </div>
         }
-        {accountsChangedMsg && <div className='msg' title={accountsChangedMsg}>Result message: {accountsChangedMsg}</div>}
+
+        <div style={{marginTop: '30px', opacity: hideStepsStatus? 0: 1, transition: 'opacity 0.2s ease-in-out'}}>
+          <div style={{marginBottom: '12px'}}>Contract sign steps</div>
+          
+          <Steps direction="vertical" current={currentStep}>
+            <Step title="Approve" description="" status={stepStatusArray[0]} />
+            <Step title="Mint" description="" status={stepStatusArray[1]} />
+          </Steps>
+        </div>
+
+        {statusMsg && <div className='msg' title={statusMsg}>{statusMsg}</div>}
       </section>
     </div>
   );

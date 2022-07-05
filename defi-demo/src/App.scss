@@ -148,3 +148,49 @@
         margin-right: 6px;
     }
 }
+
+.sign-steps {
+    .ant-steps .ant-steps-item {
+        .ant-steps-item-icon {
+            background-color: #5916e1;
+            border: none;
+            .ant-steps-icon {
+                color: #fff;
+                font-weight: 700;
+            }
+        }
+        .ant-steps-item-title {
+            color: #5916e1;
+            font-size: 22px;
+        }
+        & > .ant-steps-item-container > .ant-steps-item-tail::after {
+            background-color: #5916e1;
+        }
+
+        &.ant-steps-item-wait {
+            .ant-steps-item-icon {
+                background-color: gray;
+            }
+            .ant-steps-item-title {
+                color: gray;
+            }
+            & > .ant-steps-item-container > .ant-steps-item-tail::after {
+                background-color: gray;
+            }
+        }
+        &.ant-steps-item-error {
+            .ant-steps-item-icon {
+                background-color: #ff4d4f;
+            }
+            .ant-steps-item-title {
+                color: #ff4d4f;
+            }
+            & > .ant-steps-item-container > .ant-steps-item-tail::after {
+                background-color: #ff4d4f;
+            }
+        }
+    }
+    .ant-steps-vertical > .ant-steps-item > .ant-steps-item-container > .ant-steps-item-tail {
+        padding: 32px 0 0px;
+    }
+}
