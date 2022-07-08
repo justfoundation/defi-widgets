@@ -1,21 +1,25 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import '../App.scss';
 import BigNumber from 'bignumber.js';
+
 import { TronWebConnector } from '@widgets/tronweb-connector';
 import { SignSteps } from '@widgets/sign-steps';
-import Menu from '../components/menu';
-import { Steps } from 'antd';
 
-const { getStepNumber, executeSignsSimple } = SignSteps;
-const { Step } = Steps;
+import Menu from '../components/menu';
+
+import SignStepsPopup from '../components/SignStepsPopup';
+import { StepStatus } from '../components/SignStepsPopup/constants';
+import { StepInfo } from '../components/SignStepsPopup/StepInfo';
+
+const { executeContinuousSigns, continueCurrentSignSteps } = SignSteps;
 
 function App() {
   const [defaultAccount, setDefaultAccount] = useState(null);
   const [defaultAccountBalance, setDefaultAccountBalance] = useState('--');
-  const [hideStepsStatus, setHideStepsStatus] = useState(true);
-  const [statusMsg, setStatusMsg] = useState('');
-  const [stepStatusArray, setStepStatusArray] = useState([]);
-  const [currentStep, setCurrentStep] = useState(-1);
+  const [stepInfoArray, setStepInfoArray] = useState([]);
+  const [shouldShowPopup, setShouldShouldPopup] = useState(false);
+  const [didFinishAllSteps, setDidFinishAllSteps] = useState(true);
+
   const MAX_UINT256 = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
 
   const trxPrecision = 1e6;
@@ -25,11 +29,10 @@ function App() {
     if (window.tronWeb?.defaultAddress) {
       // @ts-ignore
       initUserInfo(window.tronWeb.defaultAddress.base58);
-      const startStepNumber = getStepNumber();
-      // console.log(startStepNumber);
     }
-    setHideStepsStatus(true);
-    setStatusMsg('');
+
+    setStepInfoArray([StepInfo('Approve'), StepInfo('Mint')]);
+    setDidFinishAllSteps(true);
   }, []);
 
   const initUserInfo = async (userAddress) => {
@@ -41,40 +44,6 @@ function App() {
     setDefaultAccountBalance(accountBalance);
   };
 
-  const updateStatusAtStep = (stepNumber, status) => {
-    var array = stepStatusArray;
-    array[stepNumber-1] = status;
-    setStepStatusArray(array);
-  };
-
-  const startEventCallback = (stepNumber) => {
-    console.log('Start at step ' + stepNumber);
-
-    setCurrentStep(stepNumber-1);
-    updateStatusAtStep(stepNumber, 'process');
-  };
-  const signedEventCallback = (stepNumber) => {
-    console.log('Signed at step ' + stepNumber);
-
-    updateStatusAtStep(stepNumber, 'finish');
-  };
-  const errorEventCallback = (stepNumber) => {
-    console.log('Error occurs at step ' + stepNumber);
-    
-    updateStatusAtStep(stepNumber, 'error');
-  };
-
-  const removeSignStepsListeners = () => {
-    SignSteps.off('startAtStep', startEventCallback);
-    SignSteps.off('signedAtStep', signedEventCallback);
-    SignSteps.off('errorAtStep', errorEventCallback);
-  }
-  const addSignStepsListeners = () => {
-    SignSteps.on('startAtStep', startEventCallback);
-    SignSteps.on('signedAtStep', signedEventCallback);
-    SignSteps.on('errorAtStep', errorEventCallback);
-  }
-
   const activate = async () => {
     const tronWeb = await TronWebConnector.activate();
 
@@ -83,42 +52,78 @@ function App() {
     }
   };
 
-  const continuousSign = async () => {
-    // @ts-ignore
-    setCurrentStep(0);
-    setHideStepsStatus(false);
-    updateStatusAtStep(1, 'wait');
-    updateStatusAtStep(2, 'wait');
-    setStatusMsg();
-    
+  const updateStatusAtStep = (stepNumber, status) => {
+    var array = [...stepInfoArray];
+    array[stepNumber-1].status = status;
+    setStepInfoArray(array);
+  };
+  
+  const startEventCallback = useCallback((stepNumber) => {
+    console.log('signSteps Demo || Started step ' + stepNumber);
+    updateStatusAtStep(stepNumber, StepStatus.Active);
+  });
+  const signedEventCallback = useCallback((stepNumber) => {
+    console.log('signSteps Demo || Signed at step ' + stepNumber);
+    updateStatusAtStep(stepNumber, StepStatus.Completed);
+  });
+  const errorEventCallback = useCallback((stepNumber, errorMsg) => {
+    console.log('signSteps Demo || Error occurs at step ' + stepNumber + ' (' + errorMsg + ')');
+    updateStatusAtStep(stepNumber, StepStatus.Error);
+  });
+  const completedAllStepsCallback = useCallback(() => {
+    console.log('signSteps Demo || Finished all steps');
+    setDidFinishAllSteps(true);
     removeSignStepsListeners();
-    addSignStepsListeners();
-    
-    const params1 = {
-      address: 'TLBaRhANQoJFTqre9Nf1mjuwNWjCJeYqUL', // usdj
-      functionSelector: 'approve(address,uint256)',
-      parameters: [
-        { type: 'address', value: 'TSgZncDVzLq5SbEsCKAeviuG7nPKtJwRzU' },
-        { type: 'uint256', value: MAX_UINT256 }
-      ],
-      options: {},
-    }
-    const params2 = {
-      address: 'TSgZncDVzLq5SbEsCKAeviuG7nPKtJwRzU',
-      functionSelector: 'mint(uint256)',
-      parameters: [{ type: 'uint256', value: '100' }],
-      options: {},
-      // callbacks: 
-    }
-    const response = await executeSignsSimple([params1, params2]);
+  });
 
-    setCurrentStep(2);
-    if (response.success && response.data && response.data.completedAmount && response.data.completedAmount > 0) {
-      console.log('Signed step: ' + response.data.completedAmount);
-      setStatusMsg('Completed step: ' + response.data.completedAmount);
-    } else {
-      setStatusMsg('Failed to complete continuous signature');
+  const removeSignStepsListeners = () => {
+    SignSteps.off('startAtStep', startEventCallback);
+    SignSteps.off('signedAtStep', signedEventCallback);
+    SignSteps.off('errorAtStep', errorEventCallback);
+    SignSteps.off('completedAllSteps', completedAllStepsCallback);
+  }
+  const addSignStepsListeners = () => {
+    SignSteps.on('startAtStep', startEventCallback);
+    SignSteps.on('signedAtStep', signedEventCallback);
+    SignSteps.on('errorAtStep', errorEventCallback);
+    SignSteps.on('completedAllSteps', completedAllStepsCallback);
+  }
+
+  const continuousSign = async () => {
+    setShouldShouldPopup(true);
+
+    if (didFinishAllSteps) {
+      setDidFinishAllSteps(false);
+      addSignStepsListeners();
+      updateStatusAtStep(1, StepStatus.Pending);
+      updateStatusAtStep(2, StepStatus.Pending);
+      
+      const params1 = {
+        address: 'TLBaRhANQoJFTqre9Nf1mjuwNWjCJeYqUL', // usdj
+        functionSelector: 'approve(address,uint256)',
+        parameters: [
+          { type: 'address', value: 'TSgZncDVzLq5SbEsCKAeviuG7nPKtJwRzU' },
+          { type: 'uint256', value: MAX_UINT256 }
+        ],
+        options: {},
+      }
+      const params2 = {
+        address: 'TSgZncDVzLq5SbEsCKAeviuG7nPKtJwRzU',
+        functionSelector: 'mint(uint256)',
+        parameters: [{ type: 'uint256', value: '100' }],
+        options: {},
+        // callbacks: 
+      }
+      executeContinuousSigns([params1, params2]);
     }
+  }
+
+  const onClickStepRetry = () => {
+    continueCurrentSignSteps();
+  }
+
+  const closePopup = () => {
+    setShouldShouldPopup(false);
   }
 
   return (
@@ -141,17 +146,12 @@ function App() {
             <div className='item' onClick={() => activate()}>Connect Wallet</div>
           </div>
         }
-
-        <div style={{marginTop: '30px', opacity: hideStepsStatus? 0: 1, transition: 'opacity 0.2s ease-in-out'}}>
-          <div style={{marginBottom: '12px'}}>Contract sign steps</div>
-          
-          <Steps direction="vertical" current={currentStep}>
-            <Step title="Approve" description="" status={stepStatusArray[0]} />
-            <Step title="Mint" description="" status={stepStatusArray[1]} />
-          </Steps>
-        </div>
-
-        {statusMsg && <div className='msg' title={statusMsg}>{statusMsg}</div>}
+        <SignStepsPopup 
+          shouldShowPopup={shouldShowPopup}
+          stepInfoArray={stepInfoArray}
+          onClickRetry={onClickStepRetry}
+          onClosePopup={closePopup}
+        />
       </section>
     </div>
   );
