@@ -27,18 +27,17 @@
 
     background-color: white;
     color: black;
-    border-radius: 22px;
+    border-radius: 20px;
 
     min-width: 480px;
-    min-height: 320px;
-    padding: 24px 32px;
+    padding: 32px 36px 92px;
 
     text-align: left;
   }
 
   .close-button {
     position: absolute;
-    top: 24px;
+    top: 32px;
     right: 32px;
     width: 32px;
     height: 32px;
@@ -59,12 +58,15 @@
   }
   .popup-desc {
     font-size: 14px;
-    margin-bottom: 12px;
+    margin-bottom: 20px;
   }
 
   .steps {
     display: flex;
     flex-direction: column;
+    background-color: #eeeeee;
+    padding: 16px 20px;
+    border-radius: 6px;
 
     .step {
       position: relative;
@@ -111,10 +113,10 @@
         line-height: 24px;
       }
       .step-title {
-        flex-grow: 1;
         margin-top: -2px;
         margin-left: 8px;
         line-height: 30px;
+        font-weight: 500;
       }
       &:not(:last-child) {
         .status-tail {
@@ -128,7 +130,7 @@
 
       &.active {
         .step-icon {
-          background-color: #5916e1;
+          background-color: #55d1b3;
 
           .step-number {
             display: block;
@@ -141,10 +143,10 @@
           }
         }
         .step-title {
-          color: #5916e1;
+          color: #55d1b3;
         }
         .status-tail {
-          background-color: #5916e1;
+          background-color: #55d1b3;
         }
       }
       &.pending {
@@ -170,7 +172,7 @@
       }
       &.completed {
         .step-icon {
-          background-color: #5916e1;
+          background-color: #55d1b3;
 
           .step-number {
             display: none;
@@ -183,10 +185,10 @@
           }
         }
         .step-title {
-          color: #5916e1;
+          color: #55d1b3;
         }
         .status-tail {
-          background-color: #5916e1;
+          background-color: #55d1b3;
         }
       }
       &.error {
@@ -215,19 +217,31 @@
 
   .finish-button,
   .retry-button {
-    position: relative;
-    display: block;
-    margin: 20px auto 0;
-    height: 40px;
+    position: absolute;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    margin: 0 auto;
+    height: 44px;
     width: 200px;
     border-radius: 12px;
     font-size: 18px;
     font-weight: 600;
     
-    background-color: #5916e1;
+    background-color: #55d1b3;
     color: #ffffff;
 
     border: none;
+    opacity: 1;
+    transition: opacity 0.2s ease 0s;
+
+    &.disabled {
+      opacity: 0;
+      
+      transform: translateX(100%);
+      transition: opacity 0s ease 0s;
+    }
   }
 
   .retry-button {
@@ -235,7 +249,7 @@
       position: absolute;
       width: 22px;
       height: 22px;
-      top: 9px;
+      top: 10px;
       left: 20px;
     }
   }

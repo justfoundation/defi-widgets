@@ -137,8 +137,13 @@ function App() {
               <div><span>Current account balance: </span>{defaultAccountBalance.toString()} TRX</div>
             </div>
 
+            <br />
+
+            <div><span>Click the button below to mint token by signing multiple smart contracts.</span></div>
             <div className='items'>
-              <div className='item' onClick={() => continuousSign()}>Continuous Signature</div>
+              <div className='item' onClick={() => continuousSign()}>
+                {didFinishAllSteps? 'Continuous Signature': 'Continue'}
+              </div>
             </div>
           </>
           :
