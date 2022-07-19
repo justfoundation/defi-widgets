@@ -12,7 +12,7 @@ interface TriggerType {
 }
 
 export class Signs {
-  private stepNumber: number = 0;
+  private currentStepNumber: number = 0;
   private completeNumber: number = 0;
   private stepParams: Array<TriggerType> = [];
   private _events: any;
@@ -40,13 +40,13 @@ export class Signs {
     return this;
   }
 
-  public getStepNumber = () => {
-    return this.stepNumber;
+  public getCurrentStepNumber = () => {
+    return this.currentStepNumber;
   };
 
   public executeContinuousSigns = async (params: Array<TriggerType>) => {
     this.completeNumber = 0;
-    this.stepNumber = 0;
+    this.currentStepNumber = 1;
     this.stepParams = params;
 
     this.continueCurrentSignSteps();
@@ -54,20 +54,20 @@ export class Signs {
 
   public continueCurrentSignSteps = async () => {
     try {
-      for (let i = this.stepNumber; i < this.stepParams.length; i++) {
-        this.stepNumber = i;
-        this.emit('startAtStep', i+1);
+      for (let i = this.currentStepNumber; i <= this.stepParams.length; i++) {
+        this.currentStepNumber = i;
+        this.emit('startAtStep', i);
 
-        const { address, functionSelector, parameters = [], options = {}, callbacks = () => {}, tronweb = {} } = this.stepParams[i];
+        const { address, functionSelector, parameters = [], options = {}, callbacks = () => {}, tronweb = {} } = this.stepParams[i-1];
         const res = await send(address, functionSelector, { parameters, options, callbacks, tronweb });
         if (res?.transaction?.txID) {
           this.completeNumber++;
-          this.emit('signedAtStep', i+1);
+          this.emit('signedAtStep', i);
         } else {
           if (!res.success && res.msg) {
-            this.emit('errorAtStep', i+1, res.msg);
+            this.emit('errorAtStep', i, res.msg);
           } else {
-            this.emit('errorAtStep', i+1, 'Unknown error');
+            this.emit('errorAtStep', i, 'Unknown error');
           }
           return;
         }
@@ -77,7 +77,7 @@ export class Signs {
         this.emit('completedAllSteps');
       }
     } catch (error) {
-      this.emit('errorAtStep', this.stepNumber+1, error);
+      this.emit('errorAtStep', this.currentStepNumber, error);
     }
   }
 }

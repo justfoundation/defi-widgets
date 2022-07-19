@@ -17,7 +17,7 @@ function App() {
   const [defaultAccount, setDefaultAccount] = useState(null);
   const [defaultAccountBalance, setDefaultAccountBalance] = useState('--');
   const [stepInfoArray, setStepInfoArray] = useState([]);
-  const [shouldShowPopup, setShouldShouldPopup] = useState(false);
+  const [shouldShowPopup, setShouldShowPopup] = useState(false);
   const [didFinishAllSteps, setDidFinishAllSteps] = useState(true);
 
   const MAX_UINT256 = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
@@ -90,7 +90,7 @@ function App() {
   }
 
   const continuousSign = async () => {
-    setShouldShouldPopup(true);
+    setShouldShowPopup(true);
 
     if (didFinishAllSteps) {
       setDidFinishAllSteps(false);
@@ -112,7 +112,6 @@ function App() {
         functionSelector: 'mint(uint256)',
         parameters: [{ type: 'uint256', value: '100' }],
         options: {},
-        // callbacks: 
       }
       executeContinuousSigns([params1, params2]);
     }
@@ -123,7 +122,7 @@ function App() {
   }
 
   const closePopup = () => {
-    setShouldShouldPopup(false);
+    setShouldShowPopup(false);
   }
 
   return (
