@@ -126,9 +126,9 @@ export const logTransaction = async (
   };
 
   const intlEn = {
-    pending: 'Pending',
-    confirmed: 'Confirmed',
-    failed: 'Failed',
+    pending:'Pending',
+    confirmed: ' Confirmed',
+    failed: 'Failed', 
   };
 
   const intl = lang === 'zh' ? intlZh : intlEn;

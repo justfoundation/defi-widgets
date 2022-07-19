@@ -79,7 +79,7 @@ Developer can listen to the TronLink events using the `on` method
 
 | Event action | Description | Version started to support |
 | ----------- | ----------- | ----------- |
-| tabReply | ... | 3.0.0 |
+| tabReply | TronLink initialization complete | 3.0.0 |
 | setAccount | when account was set | 3.0.0 |
 | setNode | when node was set | 3.0.0 |
 | accountsChanged | when switching accounts | 3.22.0 |
